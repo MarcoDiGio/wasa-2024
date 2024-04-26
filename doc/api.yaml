@@ -5,6 +5,15 @@ info:
     This OpenAPI document describes the WASA HW 
     OpenAPI specifications.
   version: "1"
+tags:
+  - name: login
+  - name: username
+  - name: follower
+  - name: ban
+  - name: user photo
+  - name: user stream
+  - name: likes
+  - name: comments
 paths:
   /session:
     post:
@@ -68,8 +77,18 @@ paths:
         contained in path.
       operationId: followUser
       responses:
-        '204': { description: User follow action successful }
-        '404': { description: User not found }
+        '201':
+          description: User follow action successful
+          content:
+            application/json:
+              schema: { $ref : "#/components/schemas/Message" }
+              example: "The action was successful"
+        '404': 
+          description: User not found
+          content:
+            application/json:
+              schema: { $ref : "#/components/schemas/Error" }
+              example: "The user could not be found"
     delete:
       tags: ["follower"]
       summary: Unfollow an user
@@ -102,8 +121,19 @@ paths:
         identifies the user name in the path
       operationId: banUser
       responses: 
-        '204': { description: User banned successfully }
-        '403': { description: This action is forbidden }
+        '200': 
+          description: User banned successfully
+          content:
+            application/json:
+              schema: { $ref : "#/components/schemas/Message" }
+              example: "User banned successfully"
+
+        '403': 
+          description: This action is forbidden
+          content:
+            application/json:
+              schema: { $ref : "#/components/schemas/Error" }
+              example: "You are not allowed to do that"
     delete:
       tags: ["ban"]
       summary: Unban an user
@@ -156,10 +186,10 @@ paths:
         description: Photo details
         content:
           multipart/form-data:
-            schema: { $ref : "#/components/schemas/PhotoFile" }
+            schema: { $ref : "#/components/schemas/PhotoBin" }
         required: true
       responses:
-        '204': { description: Photo upload action successful }
+        '201': { description: Photo upload action successful }
   /users/{userName}/stream:
     parameters:
       - in: path
@@ -246,7 +276,7 @@ paths:
         path.
       operationId: likePhoto
       responses:
-        '204': { description: Like added successfully }
+        '201': { description: Like added successfully }
         '404': { description: Photo not found }
     delete:
       tags: ["likes"]
@@ -292,7 +322,7 @@ paths:
         path.
       operationId: commentPhoto
       responses:
-        '204': { description: Comment added successfully }
+        '201': { description: Comment added successfully }
         '404': { description: Photo not found }
     delete:
       tags: ["comments"]
@@ -314,32 +344,78 @@ components:
       scheme: bearer
   schemas:
     Identifier:
+      description: |-
+        A schema that describes an
+        identifier for an user
       type: object
       properties:
         identifier:
         # change here if you decide to use an integer
         # or any other type of identifier
+          description: Unique ID of an user
           type: string
           example: "abcdef012345"
     Username:
+      description: |-
+        A schema that describes the
+        name of the user.
       type: object
       properties:
         name:
+          description: Name of an user
           type: string
           example: Maria
           pattern: 'ˆ.*?$'
           minLength: 3
           maxLength: 16
     Photos:
+      description: |-
+        A schema that describes
+        a collection of photos
       type: object
       properties:
         photos:
+          description: Array of photos in string format
           type: array
           items:
             type: string
-    PhotoFile:
+    PhotoBin:
+      description: |-
+        A schema that describes a
+        photo object converted in binary
       type: object
       properties:
         file:
+          description: Binary file
           type: string
           format: binary
+    Message:
+      description: |-
+        A schema that describes a 
+        message object that describes 
+        the status of the operation
+      type: object
+      properties:
+        message:
+          description: Message containing info about the operation
+          type: string
+    Error:
+      description: |-
+        A schema that describes a error 
+        object that contains the
+        error of the operation
+      type: object
+      properties:
+        code:
+          description: Error code
+          type: string
+        message:
+          description: Error message
+          type: string
+        trace:
+          description: Error trace
+          type: string
+      required:
+        - code
+        - message
+      
