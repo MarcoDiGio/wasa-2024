@@ -1,273 +1,345 @@
-openapi: 3.0.0
-servers:
-  - url: "http://localhost:3000"
+openapi: 3.0.3
 info:
-  title: Fantastic Coffee (decaffeinated)
-  description: Fantastic Coffee (decaffeinated), the skeleton project for Web and Software architecture course
-  version: 1.0.0
+  title: WASA HW
+  description: |-
+    This OpenAPI document describes the WASA HW 
+    OpenAPI specifications.
+  version: "1"
 paths:
-  /status:
-    parameters:
-      - $ref: "#/components/parameters/XAppBuild"
-      - $ref: "#/components/parameters/XAppVersion"
-      - $ref: "#/components/parameters/XAppLanguage"
-      - $ref: "#/components/parameters/XAppPlatform"
-    get:
-      tags: ["General"]
-      operationId: getStatusMessage
-      summary: Get status message for the user about issues / updates
+  /session:
+    post:
+      tags: ["login"]
+      summary: Logs in the user
       description: |-
-        The response contains a status message meant for the user. It might
-        contains information about current technical issues, update messages
-        or general information.
+        If the user does not exist, it will be created,
+        and an identifier is returned.
+        If the user exists, the user identifier is returned.
+      operationId: doLogin
+      requestBody:
+        description: User details
+        content:
+          application/json:
+            schema: { $ref : "#/components/schemas/Username" }
+        required: true
       responses:
-        "200":
-          description: Status message available
+        '201':
+          description: User log-in action successful
           content:
             application/json:
-              schema:
-                $ref: "#/components/schemas/StatusInfo"
-        "400": { $ref: "#/components/responses/BadRequest" }
-        "500": { $ref: "#/components/responses/InternalServerError" }
-
-  /:
-    get:
-      tags: ["Group 1"]
-      operationId: index
-      summary: Get an index
-      description: |-
-        This is an example of an index API description
-      responses:
-        "200":
-          description: Successful
-        "400": { $ref: "#/components/responses/BadRequest" }
-        "500": { $ref: "#/components/responses/InternalServerError" }
-  /context:
-    parameters:
-      - $ref: "#/components/parameters/XAppBuild"
-      - $ref: "#/components/parameters/XAppVersion"
-      - $ref: "#/components/parameters/XAppLanguage"
-      - $ref: "#/components/parameters/XAppPlatform"
-    post:
-      tags: ["Group 1"]
-      operationId: getContext
-      summary: Another API example
-      description: |-
-        Example description 2
-      responses:
-        "200":
-          description: Request ok
-          headers:
-            X-Access-Token:
-              description: Access token for authenticated requests
-              schema: { type: string }
-        "500": { $ref: "#/components/responses/InternalServerError" }
-  /authenticated:
-    parameters:
-      - $ref: "#/components/parameters/XAppBuild"
-      - $ref: "#/components/parameters/XAppVersion"
-      - $ref: "#/components/parameters/XAppLanguage"
-      - $ref: "#/components/parameters/XAppPlatform"
-    get:
-      tags: ["Group 2"]
-      operationId: getAuthenticatedExample
-      summary: Get an endpoint with authentication
-      description: |-
-        Get an endpoint with auth
-      security:
-        - LegacyAuth: []
-        - AppToken: []
-      responses:
-        "200":
-          description: Logout successful
-        "500": { $ref: "#/components/responses/InternalServerError" }
-
-  /pictures/{cat}:
-    parameters:
-      - $ref: "#/components/parameters/XAppBuild"
-      - $ref: "#/components/parameters/XAppVersion"
-      - $ref: "#/components/parameters/XAppLanguage"
-      - $ref: "#/components/parameters/XAppPlatform"
-      - $ref: "#/components/parameters/cat"
-    get:
-      tags: ["Cat pictures"]
-      operationId: getCatFromPicture
-      summary: Example of a parameter in URL
-      description: |-
-        Example of a parameter in URL
-      security:
-        - LegacyAuth: []
-      responses:
-        "200":
-          description: Student picture found
-          content:
-            image/png:
-              schema:
-                type: string
-                format: binary
-              example: Picture binary file
-        "404":
-          description: Student picture not found
-        "500": { $ref: "#/components/responses/InternalServerError" }
-
-
-  /autofeeder/{cat}:
-    parameters:
-      - $ref: "#/components/parameters/XAppBuild"
-      - $ref: "#/components/parameters/XAppVersion"
-      - $ref: "#/components/parameters/XAppLanguage"
-      - $ref: "#/components/parameters/XAppPlatform"
-      - $ref: "#/components/parameters/cat"
+              schema: { $ref : "#/components/schemas/Identifier" }
+  /users:
     put:
-      tags: ["Autofeeder"]
-      operationId: createCatAutofeeder
-      summary: Example of PUT operation
-      security:
-        - LegacyAuth: []
-      responses:
-        "200":
-          description: Auto feed enabled
-        "400": { $ref: "#/components/responses/BadRequest" }
-        "500": { $ref: "#/components/responses/InternalServerError" }
-    delete:
-      tags: ["Autofeeder"]
-      operationId: deleteCatAutofeeder
-      summary: Example of DELETE operation
-      security:
-        - LegacyAuth: []
-      responses:
-        "200":
-          description: Auto feed disabled
-        "400": { $ref: "#/components/responses/BadRequest" }
-        "500": { $ref: "#/components/responses/InternalServerError" }
-
-  /session/login:
-    parameters:
-      - $ref: "#/components/parameters/XAppBuild"
-      - $ref: "#/components/parameters/XAppVersion"
-      - $ref: "#/components/parameters/XAppLanguage"
-      - $ref: "#/components/parameters/XAppPlatform"
-    post:
-      tags: ["Session management"]
-      operationId: login
-      summary: Log-in into system
+      tags: ["username"]
+      summary: Sets the user name
       description: |-
-        Perform a log-in action using username and password credentials.
-        Returns a token which can be used in authenticated requests.
+        Change the actual user name to the one
+        specified in the body and return a new
+        identifier.
+      operationId: setMyUserName
       requestBody:
+        description: New user name
         content:
-          application/x-www-form-urlencoded:
-            schema:
-              type: object
-              properties:
-                userid:
-                  type: string
-                  pattern: '^[a-zA-Z0-9]+$'
-                  minLength: 3
-                  maxLength: 255
-                password:
-                  type: string
-                  pattern: '^.*?$'
-                  minLength: 8
-                  maxLength: 255
+          application/json:
+            schema: { $ref : "#/components/schemas/Username" }
+        required: true
       responses:
-        "200":
-          description: Login successful
-          headers:
-            X-Access-Token:
-              description: Access token for authenticated requests
-              schema: { type: string }
-        "400": { $ref: "#/components/responses/BadRequest" }
-        "403":
-          description: Login failed
-          headers:
-            X-Message:
-              description: Error message
-              schema: { type: string }
-        "500": { $ref: "#/components/responses/InternalServerError" }
-
-
+        '201':
+          description: Set user name action successful
+          content:
+            application/json:
+              schema: { $ref : "#/components/schemas/Identifier" }
+  /users/{userName}/followers:
+    parameters:
+      - in: path
+        name: userName
+        required: true
+        schema:
+          type: string
+        description: Name of an user
+        example: Maria
+    put:
+      tags: ["follower"]
+      summary: Follow an user
+      security:
+        - BearerAuth: [] 
+      description: |-
+        The user identified in the authorization
+        header will follow the user name 
+        contained in path.
+      operationId: followUser
+      responses:
+        '204': { description: User follow action successful }
+        '404': { description: User not found }
+    delete:
+      tags: ["follower"]
+      summary: Unfollow an user
+      description: |- 
+        The user contained in the path
+        will be unfollowed by the 
+        active user contained in the 
+        authorization header.
+      operationId: unfollowUser
+      responses: 
+        '204': { description: User unfollowed successfully }
+  /users/{userName}/banned:
+    parameters:
+      - in: path
+        name: userName
+        required: true
+        schema:
+          type: string
+        description: Name of an user
+        example: Maria
+    put:
+      tags: ["ban"]
+      summary: Ban an user
+      security:
+        - BearerAuth: [] 
+      description: |-
+        The user contained in the body
+        will be banned only if the userID
+        contained in the authorization header
+        identifies the user name in the path
+      operationId: banUser
+      responses: 
+        '204': { description: User banned successfully }
+        '403': { description: This action is forbidden }
+    delete:
+      tags: ["ban"]
+      summary: Unban an user
+      security:
+        - BearerAuth: [] 
+      description: |-
+        The user contained in the body
+        will be unbanned only if the userID
+        contained in the authorization header
+        identifies the user name in the path
+      operationId: unbanUser
+      responses: 
+        '204': { description: User unbanned successfully }
+        '403': { description: This action is forbidden }
+  
+  /users/{userName}/photos:
+    parameters:
+      - in: path
+        name: userName
+        required: true
+        schema:
+          type: string
+        description: Name of an user
+        example: Maria
+    get:
+      tags: ["user photo"]
+      summary: Get all photos of an user
+      description: |-
+        Get all the photos posted by the
+        user specified in the path.
+      operationId: getPhotos
+      responses:
+        '200':
+          description: Get a list of photos
+          content:
+            application/json:
+              schema: { $ref : "#/components/schemas/Photos" }
+    post:
+      tags: ["user photo"]
+      summary: Upload a photo
+      security:
+        - BearerAuth: [] 
+      description: |-
+        Uploads a photo, date and time are calculated
+        by the server when the request is made.
+        Only the users by the ID specified in the header can
+        upload a photo.
+      operationId: uploadPhoto
+      requestBody:
+        description: Photo details
+        content:
+          multipart/form-data:
+            schema: { $ref : "#/components/schemas/PhotoFile" }
+        required: true
+      responses:
+        '204': { description: Photo upload action successful }
+  /users/{userName}/stream:
+    parameters:
+      - in: path
+        name: userName
+        required: true
+        schema:
+          type: string
+        description: Name of an user
+        example: Maria
+    get:
+      tags: ["user stream"]
+      summary: Get stream of content for a user
+      description: |-
+        Get the stream of content
+        for the user name specified
+        in the path.
+      operationId: getMyStream
+      responses: 
+        '200':
+          description: Stream GET action succesful
+          content:
+            application/json:
+              schema: { $ref : "#/components/schemas/Photos" }
+  /users/{userName}/photos/{photoId}:
+    parameters:
+      - in: path
+        name: userName
+        required: true
+        schema:
+          type: string
+          pattern: 'ˆ.*?$'
+          minLength: 3
+          maxLength: 16
+        description: Session ID of a user
+        example: Maria
+      - in: path
+        name: photoId
+        required: true
+        schema:
+          type: integer
+        description: Integer ID of the user's photo
+        example: 1
+    delete:
+      tags: ["user photo"]
+      summary: Delete a photo
+      security:
+        - BearerAuth: [] 
+      description: |- 
+        Delete a photo. Only if the ID contained in
+        header identifies the user that posted the photo 
+        by photoID the delete is successful.
+      operationId: deletePhoto
+      responses:
+        '204': { description: Photo deleted successfully }
+        '403': { description: This action is forbidden }
+  /users/{userName}/photos/{photoId}/likes:
+    parameters:
+      - in: path
+        name: userName
+        required: true
+        schema:
+          type: string
+          pattern: 'ˆ.*?$'
+          minLength: 3
+          maxLength: 16
+        description: Session ID of a user
+        example: Maria
+      - in: path
+        name: photoId
+        required: true
+        schema:
+          type: integer
+        description: Integer ID of the user's photo
+        example: 1
+    put:
+      tags: ["likes"]
+      summary: Likes a photo
+      security:
+        - BearerAuth: []
+      description: |-
+        The user identified by the header will
+        like the photo specified by photoId in
+        path of the user userName specified in
+        path.
+      operationId: likePhoto
+      responses:
+        '204': { description: Like added successfully }
+        '404': { description: Photo not found }
+    delete:
+      tags: ["likes"]
+      summary: Unlikes a photo
+      security:
+        - BearerAuth: []
+      description: |-
+        The user identified by the header will
+        unlike the photo specified by photoId in
+        path of the user userName specified in
+        path.
+      operationId: unlikePhoto
+      responses:
+        '204': { description: Like deleted successfully }
+  /users/{userName}/photos/{photoId}/comments:
+    parameters:
+      - in: path
+        name: userName
+        required: true
+        schema:
+          type: string
+          pattern: 'ˆ.*?$'
+          minLength: 3
+          maxLength: 16
+        description: Session ID of a user
+        example: Maria
+      - in: path
+        name: photoId
+        required: true
+        schema:
+          type: integer
+        description: Integer ID of the user's photo
+        example: 1
+    put:
+      tags: ["comments"]
+      summary: Likes a photo
+      security:
+        - BearerAuth: []
+      description: |-
+        The user identified by the header will
+        comment the photo specified by photoId in
+        path of the user userName specified in
+        path.
+      operationId: commentPhoto
+      responses:
+        '204': { description: Comment added successfully }
+        '404': { description: Photo not found }
+    delete:
+      tags: ["comments"]
+      summary: Unlikes a photo
+      security:
+        - BearerAuth: []
+      description: |-
+        If the ID contained in the header
+        identifies the userName specified in
+        the path and if photoId is valid and
+        exists, the comment will be deleted
+      operationId: uncommentPhoto
+      responses:
+        '204': { description: Comment deleted successfully }
 components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
   schemas:
-    StatusInfo:
-      title: Status Info
+    Identifier:
       type: object
       properties:
-        status:
+        identifier:
+        # change here if you decide to use an integer
+        # or any other type of identifier
           type: string
-          enum:
-            - info
-            - warning
-            - critical
-            - ""
-        title: { type: string }
-        message: { type: string }
-        url: { type: string }
-
-  responses:
-    Unauthorized:
-      description: The access token is missing or it's expired
-    BadRequest:
-      description: The request was not compliant with the documentation (eg. missing fields, etc)
-    InternalServerError:
-      description: The server encountered an internal error. Further info in server logs
-
-  securitySchemes:
-    LegacyAuth:
-      type: apiKey
-      in: header
-      name: X-App-Token
-      description: |-
-        App session token value. This value is sent by the server in the login
-        and session refresh APIs.
-
-  parameters:
-    XAppVersion:
-      schema:
-        type: string
-        pattern: '^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$'
-        minLength: 1
-        maxLength: 10
-      name: X-App-Version
-      in: header
-      required: true
-      description: App human readable version ("semantic version" format)
-      allowEmptyValue: false
-    XAppBuild:
-      schema: { type: integer }
-      name: X-App-Build
-      in: header
-      required: true
-      description: App build number
-      allowEmptyValue: false
-    XAppLanguage:
-      schema:
-        type: string
-        pattern: '^[a-z]{2}([-_][A-Z]{2})?$'
-        minLength: 2
-        maxLength: 5
-      name: X-App-Language
-      in: header
-      required: true
-      description: App language in ISO 639-1 format
-      allowEmptyValue: false
-    XAppPlatform:
-      schema:
-        type: string
-        enum: [ios, android]
-      name: X-App-Platform
-      in: header
-      required: true
-      description: App operating system / platform
-      allowEmptyValue: false
-    cat:
-      schema:
-        type: string
-        pattern: '^[a-zA-Z]+$'
-        minLength: 3
-        maxLength: 10
-      name: cat
-      in: path
-      required: true
-      description: Cat
-      allowEmptyValue: false
+          example: "abcdef012345"
+    Username:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Maria
+          pattern: 'ˆ.*?$'
+          minLength: 3
+          maxLength: 16
+    Photos:
+      type: object
+      properties:
+        photos:
+          type: array
+          items:
+            type: string
+    PhotoFile:
+      type: object
+      properties:
+        file:
+          type: string
+          format: binary
