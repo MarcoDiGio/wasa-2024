@@ -36,6 +36,8 @@ paths:
           content:
             application/json:
               schema: { $ref : "#/components/schemas/Identifier" }
+              example: 
+                identifier: "abcdef012345"
   /users:
     put:
       tags: ["username"]
@@ -50,6 +52,8 @@ paths:
         content:
           application/json:
             schema: { $ref : "#/components/schemas/Username" }
+            example: 
+              name: Maria
         required: true
       responses:
         '201':
@@ -57,6 +61,8 @@ paths:
           content:
             application/json:
               schema: { $ref : "#/components/schemas/Identifier" }
+              example: 
+                identifier: "abcdef012345"
   /users/{userName}/followers:
     parameters:
       - in: path
@@ -64,7 +70,10 @@ paths:
         required: true
         schema:
           type: string
-        description: Name of an user
+          pattern: 'ˆ.*?$'
+          minLength: 3
+          maxLength: 16
+        description: Session ID of a user
         example: Maria
     put:
       tags: ["follower"]
@@ -82,13 +91,18 @@ paths:
           content:
             application/json:
               schema: { $ref : "#/components/schemas/Message" }
-              example: "The action was successful"
+              example: { message: "The action was successful" }
         '404': 
           description: User not found
           content:
             application/json:
-              schema: { $ref : "#/components/schemas/Error" }
-              example: "The user could not be found"
+              schema: { $ref : "#/components/schemas/ErrorContainer" }
+              example:
+                trace: AAAAAAAA-BBBB-CCCC-DDDD-FFFFFFFFFFFF
+                errors:
+                  - code: 'not_found'
+                    message: 'The user was not found'
+                    more_info: 'The user may not be present in the database'
     delete:
       tags: ["follower"]
       summary: Unfollow an user
@@ -107,7 +121,10 @@ paths:
         required: true
         schema:
           type: string
-        description: Name of an user
+          pattern: 'ˆ.*?$'
+          minLength: 3
+          maxLength: 16
+        description: Session ID of a user
         example: Maria
     put:
       tags: ["ban"]
@@ -122,18 +139,24 @@ paths:
       operationId: banUser
       responses: 
         '200': 
-          description: User banned successfully
+          description: User ban action successful
           content:
             application/json:
               schema: { $ref : "#/components/schemas/Message" }
-              example: "User banned successfully"
+              example: { message: "User banned successfully" }
 
         '403': 
-          description: This action is forbidden
+          description: User ban action forbidden
           content:
             application/json:
-              schema: { $ref : "#/components/schemas/Error" }
-              example: "You are not allowed to do that"
+              schema: { $ref : "#/components/schemas/ErrorContainer" }
+              example:
+                trace: AAAAAAAA-BBBB-CCCC-DDDD-FFFFFFFFFFFF
+                errors:
+                  - code: 'forbidden'
+                    message: 'You are not allowed to do that'
+                    more_info: 'You do not have permissions.'
+
     delete:
       tags: ["ban"]
       summary: Unban an user
@@ -147,7 +170,17 @@ paths:
       operationId: unbanUser
       responses: 
         '204': { description: User unbanned successfully }
-        '403': { description: This action is forbidden }
+        '403': 
+          description: This action is forbidden
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorContainer" }
+              example:
+                trace: AAAAAAAA-BBBB-CCCC-DDDD-FFFFFFFFFFFF
+                errors:
+                  - code: 'forbidden'
+                    message: 'You are not allowed to do that'
+                    more_info: 'You do not have permissions.'
   
   /users/{userName}/photos:
     parameters:
@@ -156,7 +189,10 @@ paths:
         required: true
         schema:
           type: string
-        description: Name of an user
+          pattern: 'ˆ.*?$'
+          minLength: 3
+          maxLength: 16
+        description: Session ID of a user
         example: Maria
     get:
       tags: ["user photo"]
@@ -171,6 +207,11 @@ paths:
           content:
             application/json:
               schema: { $ref : "#/components/schemas/Photos" }
+              example:
+                photos:
+                  - "/public/photo1.png"
+                  - "/public/photo2.png"
+                  - "/public/photo3.png"
     post:
       tags: ["user photo"]
       summary: Upload a photo
@@ -189,7 +230,12 @@ paths:
             schema: { $ref : "#/components/schemas/PhotoBin" }
         required: true
       responses:
-        '201': { description: Photo upload action successful }
+        '201': 
+          description: Photo upload action successful
+          content:
+            application/json:
+              schema: { $ref : "#/components/schemas/Message" }
+              example: { message: "Photo uploaded successfully" }
   /users/{userName}/stream:
     parameters:
       - in: path
@@ -197,7 +243,10 @@ paths:
         required: true
         schema:
           type: string
-        description: Name of an user
+          pattern: 'ˆ.*?$'
+          minLength: 3
+          maxLength: 16
+        description: Session ID of a user
         example: Maria
     get:
       tags: ["user stream"]
@@ -213,6 +262,11 @@ paths:
           content:
             application/json:
               schema: { $ref : "#/components/schemas/Photos" }
+              example: 
+                photos:
+                  - "/public/photo1.png"
+                  - "/public/photo2.png"
+                  - "/public/photo3.png"
   /users/{userName}/photos/{photoId}:
     parameters:
       - in: path
@@ -244,7 +298,41 @@ paths:
       operationId: deletePhoto
       responses:
         '204': { description: Photo deleted successfully }
-        '403': { description: This action is forbidden }
+        '400': 
+          description: User not found
+          content:
+            application/json:
+              schema: { $ref : "#/components/schemas/ErrorContainer" }
+              example:
+                trace: AAAAAAAA-BBBB-CCCC-DDDD-FFFFFFFFFFFF
+                errors:
+                  - code: 'bad_request'
+                    message: 'The user was not found'
+                    more_info: 'The user may not be present in the database'
+        '403': 
+          description: Photo delete action forbidden
+          content:
+            application/json:
+              schema: { $ref : "#/components/schemas/ErrorContainer" }
+              example:
+                trace: AAAAAAAA-BBBB-CCCC-DDDD-FFFFFFFFFFFF
+                errors:
+                  - code: 'forbidden'
+                    message: 'You are not allowed to do that'
+                    more_info: 'You do not have permissions.'
+        '404': 
+          description: Photo not found
+          content:
+            application/json:
+              schema: { $ref : "#/components/schemas/ErrorContainer" }
+              example:
+                trace: AAAAAAAA-BBBB-CCCC-DDDD-FFFFFFFFFFFF
+                errors:
+                  - code: 'not_found'
+                    message: 'The photo was not found'
+                    more_info: 'The photo may not be present in the database'
+          
+          
   /users/{userName}/photos/{photoId}/likes:
     parameters:
       - in: path
@@ -276,8 +364,23 @@ paths:
         path.
       operationId: likePhoto
       responses:
-        '201': { description: Like added successfully }
-        '404': { description: Photo not found }
+        '201':
+          description: Add like action successful
+          content:
+            application/json:
+              schema: { $ref : "#/components/schemas/Message" }
+              example: { message: "The action was successful" }
+        '404': 
+          description: Photo not found
+          content:
+            application/json:
+              schema: { $ref : "#/components/schemas/ErrorContainer" }
+              example:
+                trace: AAAAAAAA-BBBB-CCCC-DDDD-FFFFFFFFFFFF
+                errors:
+                  - code: 'not_found'
+                    message: 'The user was not found'
+                    more_info: 'The user may not be present in the database'
     delete:
       tags: ["likes"]
       summary: Unlikes a photo
@@ -322,8 +425,23 @@ paths:
         path.
       operationId: commentPhoto
       responses:
-        '201': { description: Comment added successfully }
-        '404': { description: Photo not found }
+        '201':
+          description: User comment action successful
+          content:
+            application/json:
+              schema: { $ref : "#/components/schemas/Message" }
+              example: { message: "The action was successful" }
+        '404': 
+          description: Photo not found
+          content:
+            application/json:
+              schema: { $ref : "#/components/schemas/ErrorContainer" }
+              example:
+                trace: AAAAAAAA-BBBB-CCCC-DDDD-FFFFFFFFFFFF
+                errors:
+                  - code: 'not_found'
+                    message: 'The photo was not found'
+                    more_info: 'The photo may not be present in the database'
     delete:
       tags: ["comments"]
       summary: Unlikes a photo
@@ -364,8 +482,8 @@ components:
         name:
           description: Name of an user
           type: string
-          example: Maria
           pattern: 'ˆ.*?$'
+          example: Maria
           minLength: 3
           maxLength: 16
     Photos:
@@ -377,8 +495,11 @@ components:
         photos:
           description: Array of photos in string format
           type: array
+          minItems: 0
+          maxItems: 100000
           items:
             type: string
+            pattern: 'ˆ.*?$'
     PhotoBin:
       description: |-
         A schema that describes a
@@ -399,23 +520,39 @@ components:
         message:
           description: Message containing info about the operation
           type: string
+          minLength: 0
+          maxLength: 256
+    ErrorContainer:
+      description: 'An error response for an operation.'
+      type: object
+      properties:
+        errors:
+          type: array
+          minItems: 0
+          maxItems: 100
+          description: 'The array of error entries associated with the error response'
+          items:
+            $ref: '#/components/schemas/Error'
+        trace:
+          description: 'The error trace information.'
+          type: string
+          format: uuid
     Error:
-      description: |-
-        A schema that describes a error 
-        object that contains the
-        error of the operation
+      description: 'An error response entry.'
       type: object
       properties:
         code:
-          description: Error code
+          description: 'The error code.'
           type: string
+          enum:
+            - 'bad_request'
+            - 'forbidden'
+            - 'not_authorized'
+            - 'not_found'
         message:
-          description: Error message
+          description: 'The error message.'
           type: string
-        trace:
-          description: Error trace
+        more_info:
+          description: 'Additional info about the error.'
           type: string
-      required:
-        - code
-        - message
       
