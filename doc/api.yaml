@@ -11,6 +11,7 @@ tags:
   - name: follower
   - name: ban
   - name: user photo
+  - name: user profile
   - name: user stream
   - name: likes
   - name: comments
@@ -63,6 +64,44 @@ paths:
               schema: { $ref : "#/components/schemas/Identifier" }
               example: 
                 identifier: "abcdef012345"
+  /users/{userName}:
+    parameters:
+      - in: path
+        name: userName
+        required: true
+        schema:
+          type: string
+          pattern: 'ˆ.*?$'
+          minLength: 3
+          maxLength: 16
+        description: Session ID of a user
+        example: Maria
+    get:
+      tags: ["user profile"]
+      summary: Get the user profile
+      security: 
+        - BearerAuth: []
+      description: |-
+        Fetch all the required informations
+        for a user profile page, including
+        followers, following, how many photos
+        have been uploaded. If user is banned
+        by userName contained in path then
+        the action is forbidden.
+      operationId: getUserProfile
+      responses:
+        '200':
+          description: User fetch action successful
+          content:
+            application/json:
+              schema: { $ref : "#/components/schemas/Profile" }
+              example:
+                following: 15
+                followers: 15
+                photos:
+                  - "/public/photo1.png"
+                  - "/public/photo2.png"
+                  - "/public/photo3.png"
   /users/{userName}/followers:
     parameters:
       - in: path
@@ -156,7 +195,6 @@ paths:
                   - code: 'forbidden'
                     message: 'You are not allowed to do that'
                     more_info: 'You do not have permissions.'
-
     delete:
       tags: ["ban"]
       summary: Unban an user
@@ -538,11 +576,11 @@ components:
           type: string
           format: uuid
     Error:
-      description: 'An error response entry.'
+      description: An error response entry.
       type: object
       properties:
         code:
-          description: 'The error code.'
+          description: The error code.
           type: string
           enum:
             - 'bad_request'
@@ -550,9 +588,28 @@ components:
             - 'not_authorized'
             - 'not_found'
         message:
-          description: 'The error message.'
+          description: The error message.
           type: string
         more_info:
-          description: 'Additional info about the error.'
+          description: Additional info about the error.
           type: string
+    Profile:
+      description: Profile of an user
+      type: object
+      properties:
+        following:
+          description: An integer describing the following
+          type: integer
+        followers:
+          description: An integer describing the followers
+          type: integer
+        photos:
+          description: Array of photos in string format
+          type: array
+          minItems: 0
+          maxItems: 100000
+          items:
+            type: string
+            pattern: 'ˆ.*?$'
+        
       
