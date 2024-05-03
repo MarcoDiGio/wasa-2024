@@ -195,6 +195,24 @@ paths:
                   - code: 'forbidden'
                     message: 'You are not allowed to do that'
                     more_info: 'You do not have permissions.'
+  /users/{userName}/banned/{banId}:
+    parameters:
+      - in: path
+        name: userName
+        required: true
+        schema:
+          type: string
+          pattern: 'ˆ.*?$'
+          minLength: 3
+          maxLength: 16
+        description: Session ID of a user
+        example: Maria
+      - in: path
+        name: banId
+        required: true
+        schema:
+          type: integer
+        description: Ban ID of an user
     delete:
       tags: ["ban"]
       summary: Unban an user
@@ -219,7 +237,7 @@ paths:
                   - code: 'forbidden'
                     message: 'You are not allowed to do that'
                     more_info: 'You do not have permissions.'
-  
+
   /users/{userName}/photos:
     parameters:
       - in: path
@@ -369,8 +387,6 @@ paths:
                   - code: 'not_found'
                     message: 'The photo was not found'
                     more_info: 'The photo may not be present in the database'
-          
-          
   /users/{userName}/photos/{photoId}/likes:
     parameters:
       - in: path
@@ -419,6 +435,32 @@ paths:
                   - code: 'not_found'
                     message: 'The user was not found'
                     more_info: 'The user may not be present in the database'
+  /users/{userName}/photos/{photoId}/likes/{likeId}:
+    parameters:
+      - in: path
+        name: userName
+        required: true
+        schema:
+          type: string
+          pattern: 'ˆ.*?$'
+          minLength: 3
+          maxLength: 16
+        description: Session ID of a user
+        example: Maria
+      - in: path
+        name: photoId
+        required: true
+        schema:
+          type: integer
+        description: Integer ID of the user's photo
+        example: 1
+      - in: path
+        name: likeId
+        required: true
+        schema:
+          type: integer
+        description: Integer ID of the user's like
+        example: 1
     delete:
       tags: ["likes"]
       summary: Unlikes a photo
@@ -432,6 +474,7 @@ paths:
       operationId: unlikePhoto
       responses:
         '204': { description: Like deleted successfully }
+    
   /users/{userName}/photos/{photoId}/comments:
     parameters:
       - in: path
@@ -480,6 +523,32 @@ paths:
                   - code: 'not_found'
                     message: 'The photo was not found'
                     more_info: 'The photo may not be present in the database'
+  /users/{userName}/photos/{photoId}/comments/{commentId}:
+    parameters:
+      - in: path
+        name: userName
+        required: true
+        schema:
+          type: string
+          pattern: 'ˆ.*?$'
+          minLength: 3
+          maxLength: 16
+        description: Session ID of a user
+        example: Maria
+      - in: path
+        name: photoId
+        required: true
+        schema:
+          type: integer
+        description: Integer ID of the user's photo
+        example: 1
+      - in: path
+        name: commentId
+        required: true
+        schema:
+          type: integer
+        description: Integer ID of a comment
+        example: 1
     delete:
       tags: ["comments"]
       summary: Unlikes a photo
@@ -493,6 +562,7 @@ paths:
       operationId: uncommentPhoto
       responses:
         '204': { description: Comment deleted successfully }
+      
 components:
   securitySchemes:
     BearerAuth:
