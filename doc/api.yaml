@@ -102,6 +102,17 @@ paths:
                   - "/public/photo1.png"
                   - "/public/photo2.png"
                   - "/public/photo3.png"
+        '404':
+          description: User does not exist
+          content:
+            application/json:
+              schema: { $ref : "#/components/schemas/ErrorContainer" }
+              example:
+                trace: AAAAAAAA-BBBB-CCCC-DDDD-FFFFFFFFFFFF
+                errors:
+                  - code: 'not_found'
+                    message: 'The user was not found'
+                    more_info: 'The user may not be present in the database'
   /users/{userName}/followers:
     parameters:
       - in: path

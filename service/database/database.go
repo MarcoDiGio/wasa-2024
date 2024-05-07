@@ -40,8 +40,19 @@ import (
 type AppDatabase interface {
 	GetName() (string, error)
 	SetName(name string) error
-
+	GetUserProfile() ([]UserProfile, error)
 	Ping() error
+}
+
+type UserProfile struct {
+	ID        uint64
+	Following uint64
+	Followers uint64
+	Photos    []Photo
+}
+
+type Photo struct {
+	photo string
 }
 
 type appdbimpl struct {
@@ -57,9 +68,13 @@ func New(db *sql.DB) (AppDatabase, error) {
 
 	// Check if table exists. If not, the database is empty, and we need to create the structure
 	var tableName string
-	err := db.QueryRow(`SELECT name FROM sqlite_master WHERE type='table' AND name='example_table';`).Scan(&tableName)
+	err := db.QueryRow(`SELECT name FROM sqlite_master WHERE type='table' AND name='UserProfile';`).Scan(&tableName)
 	if errors.Is(err, sql.ErrNoRows) {
-		sqlStmt := `CREATE TABLE example_table (id INTEGER NOT NULL PRIMARY KEY, name TEXT);`
+		sqlStmt := `CREATE TABLE UserProfile (
+			id INTEGER NOT NULL PRIMARY KEY autoincrement,
+			following INTEGER NOT NULL,
+			followers INTEGER NOT NULL
+			);`
 		_, err = db.Exec(sqlStmt)
 		if err != nil {
 			return nil, fmt.Errorf("error creating database structure: %w", err)
