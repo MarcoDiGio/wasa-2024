@@ -153,6 +153,24 @@ paths:
                   - code: 'not_found'
                     message: 'The user was not found'
                     more_info: 'The user may not be present in the database'
+  /users/{userName}/followers/{followId}:
+    parameters:
+      - in: path
+        name: userName
+        required: true
+        schema:
+          type: string
+          pattern: 'ˆ.*?$'
+          minLength: 3
+          maxLength: 16
+        description: Session ID of a user
+        example: Maria
+      - in: path
+        name: followId
+        required: true
+        schema:
+          type: integer
+        description: Follow ID of an user
     delete:
       tags: ["follower"]
       summary: Unfollow an user
@@ -507,7 +525,7 @@ paths:
         example: 1
     put:
       tags: ["comments"]
-      summary: Likes a photo
+      summary: Comments a photo
       security:
         - BearerAuth: []
       description: |-
@@ -562,7 +580,7 @@ paths:
         example: 1
     delete:
       tags: ["comments"]
-      summary: Unlikes a photo
+      summary: Uncomments a photo
       security:
         - BearerAuth: []
       description: |-
