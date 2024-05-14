@@ -40,8 +40,13 @@ import (
 type AppDatabase interface {
 	GetName() (string, error)
 	SetName(name string) error
-	GetUserProfile() ([]UserProfile, error)
+	CheckUser(user User) (bool, error)
+	PostUser(user User) error
 	Ping() error
+}
+
+type User struct {
+	ID string
 }
 
 type UserProfile struct {
@@ -52,7 +57,7 @@ type UserProfile struct {
 }
 
 type Photo struct {
-	photo string
+	ID string
 }
 
 type appdbimpl struct {
@@ -68,14 +73,9 @@ func New(db *sql.DB) (AppDatabase, error) {
 
 	// Check if table exists. If not, the database is empty, and we need to create the structure
 	var tableName string
-	err := db.QueryRow(`SELECT name FROM sqlite_master WHERE type='table' AND name='UserProfile';`).Scan(&tableName)
+	err := db.QueryRow(`SELECT name FROM sqlite_master WHERE type='table' AND name='users';`).Scan(&tableName)
 	if errors.Is(err, sql.ErrNoRows) {
-		sqlStmt := `CREATE TABLE UserProfile (
-			id INTEGER NOT NULL PRIMARY KEY autoincrement,
-			following INTEGER NOT NULL,
-			followers INTEGER NOT NULL
-			);`
-		_, err = db.Exec(sqlStmt)
+		err = createDatabase(db)
 		if err != nil {
 			return nil, fmt.Errorf("error creating database structure: %w", err)
 		}
@@ -88,4 +88,48 @@ func New(db *sql.DB) (AppDatabase, error) {
 
 func (db *appdbimpl) Ping() error {
 	return db.c.Ping()
+}
+
+func createDatabase(db *sql.DB) error {
+	// @TODO: Think more about the DB structure
+	tables := [6]string{
+		`CREATE TABLE IF NOT EXISTS users (
+			user_id VARCHAR(16) NOT NULL PRIMARY KEY
+		);`,
+		`CREATE TABLE IF NOT EXISTS photos (
+			photo_id INTEGER PRIMARY KEY AUTOINCREMENT,
+			date DATETIME NOT NULL,
+			author_id VARCHAR(16) NOT NULL
+		);`,
+		`CREATE TABLE IF NOT EXISTS comments (
+			comment_id INTEGER PRIMARY KEY AUTOINCREMENT,
+			photo_id INTEGER NOT NULL
+		);`,
+		`CREATE TABLE IF NOT EXISTS likes (
+			like_id INTEGER PRIMARY KEY AUTOINCREMENT,
+			photo_id INTEGER NOT NULL
+		);`,
+		`CREATE TABLE IF NOT EXISTS banned_users (
+			ban_id INTEGER PRIMARY KEY AUTOINCREMENT,
+			banner VARCHAR(16) NOT NULL,
+			banned VARCHAR(16) NOT NULL,
+			FOREIGN KEY(banner) REFERENCES users (id_user) ON DELETE CASCADE,
+			FOREIGN KEY(banned) REFERENCES users (id_user) ON DELETE CASCADE
+		);`,
+		`CREATE TABLE IF NOT EXISTS follower (
+			follow_id INTEGER PRIMARY KEY AUTOINCREMENT,
+			follower VARCHAR(16) NOT NULL,
+			followed VARCHAR(16) NOT NULL,
+			FOREIGN KEY(follower) REFERENCES users (id_user) ON DELETE CASCADE,
+			FOREIGN KEY(followed) REFERENCES users (id_user) ON DELETE CASCADE
+		);`,
+	}
+
+	for i := 0; i < len(tables); i++ {
+		_, err := db.Exec(tables[i])
+		if err != nil {
+			return fmt.Errorf("error creating database structure: %w", err)
+		}
+	}
+	return nil
 }
