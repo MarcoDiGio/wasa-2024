@@ -45,3 +45,11 @@ func (db *appdbimpl) GetAllUsers() ([]User, error) {
 	}
 	return users, nil
 }
+
+func (db *appdbimpl) ChangeUsername(user User) error {
+	_, err := db.c.Exec("UPDATE INTO users VALUES (?)", user.ID)
+	if err != nil {
+		return err
+	}
+	return nil
+}
