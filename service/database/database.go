@@ -39,14 +39,15 @@ import (
 // AppDatabase is the high level interface for the DB
 type AppDatabase interface {
 	GetName() (string, error)
-	SetName(name string) error
+	ChangeUsername(user User) error
 	CheckUser(user User) (bool, error)
 	PostUser(user User) error
+	GetAllUsers() ([]User, error)
 	Ping() error
 }
 
 type User struct {
-	ID string
+	ID string `json:"user_id"`
 }
 
 type UserProfile struct {

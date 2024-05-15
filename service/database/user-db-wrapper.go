@@ -28,3 +28,20 @@ func (db *appdbimpl) CheckUser(u User) (bool, error) {
 	}
 	return exists, err
 }
+
+func (db *appdbimpl) GetAllUsers() ([]User, error) {
+	var users = make([]User, 0)
+	rows, err := db.c.Query("SELECT * FROM users")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var user User
+		if err := rows.Scan(&user.ID); err != nil {
+			return nil, err
+		}
+		users = append(users, user)
+	}
+	return users, nil
+}

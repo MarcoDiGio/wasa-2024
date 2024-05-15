@@ -16,6 +16,7 @@ func (rt *_router) postSession(w http.ResponseWriter, r *http.Request, ps httpro
 		return
 	} else if !user.isValid() {
 		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 	err = rt.db.PostUser(user.toDatabase())
 	if err != nil {
