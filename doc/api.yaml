@@ -39,43 +39,9 @@ paths:
               schema: { $ref : "#/components/schemas/Identifier" }
               example: 
                 identifier: "abcdef012345"
-  /users:
-    put:
-      tags: ["username"]
-      summary: Sets the user name
-      description: |-
-        Change the actual user name to the one
-        specified in the body and return a new
-        identifier.
-      operationId: setMyUserName
-      requestBody:
-        description: New user name
-        content:
-          application/json:
-            schema: { $ref : "#/components/schemas/Username" }
-            example: 
-              name: Maria
-        required: true
-      responses:
-        '201':
-          description: Set user name action successful
-          content:
-            application/json:
-              schema: { $ref : "#/components/schemas/Identifier" }
-              example: 
-                identifier: "abcdef012345"
   /users/{userName}:
-    parameters:
-      - in: path
-        name: userName
-        required: true
-        schema:
-          type: string
-          pattern: 'ˆ.*?$'
-          minLength: 3
-          maxLength: 16
-        description: Session ID of a user
-        example: Maria
+    parameters: 
+      - $ref : "#/components/parameters/username"
     get:
       tags: ["user profile"]
       summary: Get the user profile
@@ -113,27 +79,52 @@ paths:
                   - code: 'not_found'
                     message: 'The user was not found'
                     more_info: 'The user may not be present in the database'
-  /users/{userName}/followers:
-    parameters:
+    put:
+      tags: ["username"]
+      summary: Sets the user name
+      description: |-
+        Change the actual user name to the one
+        specified in the body and return a new
+        identifier.
+      operationId: setMyUserName
+      requestBody:
+        description: New user name
+        content:
+          application/json:
+            schema: { $ref : "#/components/schemas/Username" }
+            example: 
+              name: Maria
+        required: true
+      responses:
+        '201':
+          description: Set user name action successful
+          content:
+            application/json:
+              schema: { $ref : "#/components/schemas/Identifier" }
+              example: 
+                identifier: "abcdef012345"
+  /users/{userName}/followers/{followedId}:
+    parameters: 
+      - $ref : "#/components/parameters/username"
       - in: path
-        name: userName
+        name: followedId
         required: true
         schema:
           type: string
-          pattern: 'ˆ.*?$'
           minLength: 3
           maxLength: 16
-        description: Session ID of a user
-        example: Maria
+          pattern: 'ˆ.*?$'
+        description: Follow ID of an user
+        example: "Mario66"
     put:
       tags: ["follower"]
       summary: Follow an user
       security:
         - BearerAuth: [] 
       description: |-
-        The user identified in the authorization
-        header will follow the user name 
-        contained in path.
+        The user that is userName in path
+        will follow the user that is the
+        followedId in path.
       operationId: followUser
       responses:
         '201':
@@ -153,24 +144,6 @@ paths:
                   - code: 'not_found'
                     message: 'The user was not found'
                     more_info: 'The user may not be present in the database'
-  /users/{userName}/followers/{followId}:
-    parameters:
-      - in: path
-        name: userName
-        required: true
-        schema:
-          type: string
-          pattern: 'ˆ.*?$'
-          minLength: 3
-          maxLength: 16
-        description: Session ID of a user
-        example: Maria
-      - in: path
-        name: followId
-        required: true
-        schema:
-          type: integer
-        description: Follow ID of an user
     delete:
       tags: ["follower"]
       summary: Unfollow an user
@@ -183,18 +156,9 @@ paths:
       responses: 
         '204': { description: User unfollowed successfully }
   /users/{userName}/banned:
-    parameters:
-      - in: path
-        name: userName
-        required: true
-        schema:
-          type: string
-          pattern: 'ˆ.*?$'
-          minLength: 3
-          maxLength: 16
-        description: Session ID of a user
-        example: Maria
-    put:
+    parameters: 
+      - $ref : "#/components/parameters/username"
+    post:
       tags: ["ban"]
       summary: Ban an user
       security:
@@ -206,13 +170,12 @@ paths:
         identifies the user name in the path
       operationId: banUser
       responses: 
-        '200': 
+        '201': 
           description: User ban action successful
           content:
             application/json:
               schema: { $ref : "#/components/schemas/Message" }
               example: { message: "User banned successfully" }
-
         '403': 
           description: User ban action forbidden
           content:
@@ -225,17 +188,8 @@ paths:
                     message: 'You are not allowed to do that'
                     more_info: 'You do not have permissions.'
   /users/{userName}/banned/{banId}:
-    parameters:
-      - in: path
-        name: userName
-        required: true
-        schema:
-          type: string
-          pattern: 'ˆ.*?$'
-          minLength: 3
-          maxLength: 16
-        description: Session ID of a user
-        example: Maria
+    parameters: 
+      - $ref : "#/components/parameters/username"
       - in: path
         name: banId
         required: true
@@ -268,17 +222,8 @@ paths:
                     more_info: 'You do not have permissions.'
 
   /users/{userName}/photos:
-    parameters:
-      - in: path
-        name: userName
-        required: true
-        schema:
-          type: string
-          pattern: 'ˆ.*?$'
-          minLength: 3
-          maxLength: 16
-        description: Session ID of a user
-        example: Maria
+    parameters: 
+      - $ref : "#/components/parameters/username"
     get:
       tags: ["user photo"]
       summary: Get all photos of an user
@@ -322,17 +267,8 @@ paths:
               schema: { $ref : "#/components/schemas/Message" }
               example: { message: "Photo uploaded successfully" }
   /users/{userName}/stream:
-    parameters:
-      - in: path
-        name: userName
-        required: true
-        schema:
-          type: string
-          pattern: 'ˆ.*?$'
-          minLength: 3
-          maxLength: 16
-        description: Session ID of a user
-        example: Maria
+    parameters: 
+      - $ref : "#/components/parameters/username"
     get:
       tags: ["user stream"]
       summary: Get stream of content for a user
@@ -353,17 +289,8 @@ paths:
                   - "/public/photo2.png"
                   - "/public/photo3.png"
   /users/{userName}/photos/{photoId}:
-    parameters:
-      - in: path
-        name: userName
-        required: true
-        schema:
-          type: string
-          pattern: 'ˆ.*?$'
-          minLength: 3
-          maxLength: 16
-        description: Session ID of a user
-        example: Maria
+    parameters: 
+      - $ref : "#/components/parameters/username"
       - in: path
         name: photoId
         required: true
@@ -416,18 +343,28 @@ paths:
                   - code: 'not_found'
                     message: 'The photo was not found'
                     more_info: 'The photo may not be present in the database'
-  /users/{userName}/photos/{photoId}/likes:
-    parameters:
-      - in: path
-        name: userName
-        required: true
-        schema:
-          type: string
-          pattern: 'ˆ.*?$'
-          minLength: 3
-          maxLength: 16
-        description: Session ID of a user
-        example: Maria
+  # /users/{userName}/photos/{photoId}/likes:
+  #   parameters:
+  #     - in: path
+  #       name: userName
+  #       required: true
+  #       schema:
+  #         type: string
+  #         pattern: 'ˆ.*?$'
+  #         minLength: 3
+  #         maxLength: 16
+  #       description: Session ID of a user
+  #       example: Maria
+  #     - in: path
+  #       name: photoId
+  #       required: true
+  #       schema:
+  #         type: integer
+  #       description: Integer ID of the user's photo
+  #       example: 1
+  /users/{userName}/photos/{photoId}/likes/{likeId}:
+    parameters: 
+      - $ref : "#/components/parameters/username"
       - in: path
         name: photoId
         required: true
@@ -435,6 +372,26 @@ paths:
           type: integer
         description: Integer ID of the user's photo
         example: 1
+      - in: path
+        name: likeId
+        required: true
+        schema:
+          type: integer
+        description: Integer ID of the user's like
+        example: 1
+    delete:
+      tags: ["likes"]
+      summary: Unlikes a photo
+      security:
+        - BearerAuth: []
+      description: |-
+        The user identified by the header will
+        unlike the photo specified by photoId in
+        path of the user userName specified in
+        path.
+      operationId: unlikePhoto
+      responses:
+        '204': { description: Like deleted successfully }
     put:
       tags: ["likes"]
       summary: Likes a photo
@@ -464,58 +421,10 @@ paths:
                   - code: 'not_found'
                     message: 'The user was not found'
                     more_info: 'The user may not be present in the database'
-  /users/{userName}/photos/{photoId}/likes/{likeId}:
-    parameters:
-      - in: path
-        name: userName
-        required: true
-        schema:
-          type: string
-          pattern: 'ˆ.*?$'
-          minLength: 3
-          maxLength: 16
-        description: Session ID of a user
-        example: Maria
-      - in: path
-        name: photoId
-        required: true
-        schema:
-          type: integer
-        description: Integer ID of the user's photo
-        example: 1
-      - in: path
-        name: likeId
-        required: true
-        schema:
-          type: integer
-        description: Integer ID of the user's like
-        example: 1
-    delete:
-      tags: ["likes"]
-      summary: Unlikes a photo
-      security:
-        - BearerAuth: []
-      description: |-
-        The user identified by the header will
-        unlike the photo specified by photoId in
-        path of the user userName specified in
-        path.
-      operationId: unlikePhoto
-      responses:
-        '204': { description: Like deleted successfully }
     
   /users/{userName}/photos/{photoId}/comments:
-    parameters:
-      - in: path
-        name: userName
-        required: true
-        schema:
-          type: string
-          pattern: 'ˆ.*?$'
-          minLength: 3
-          maxLength: 16
-        description: Session ID of a user
-        example: Maria
+    parameters: 
+      - $ref : "#/components/parameters/username"
       - in: path
         name: photoId
         required: true
@@ -523,7 +432,7 @@ paths:
           type: integer
         description: Integer ID of the user's photo
         example: 1
-    put:
+    post:
       tags: ["comments"]
       summary: Comments a photo
       security:
@@ -553,17 +462,8 @@ paths:
                     message: 'The photo was not found'
                     more_info: 'The photo may not be present in the database'
   /users/{userName}/photos/{photoId}/comments/{commentId}:
-    parameters:
-      - in: path
-        name: userName
-        required: true
-        schema:
-          type: string
-          pattern: 'ˆ.*?$'
-          minLength: 3
-          maxLength: 16
-        description: Session ID of a user
-        example: Maria
+    parameters: 
+      - $ref : "#/components/parameters/username"
       - in: path
         name: photoId
         required: true
@@ -593,6 +493,19 @@ paths:
         '204': { description: Comment deleted successfully }
       
 components:
+  parameters:
+    username:
+      in: path
+      name: userName
+      required: true
+      schema:
+        type: string
+        pattern: 'ˆ.*?$'
+        minLength: 3
+        maxLength: 16
+      description: Session ID of a user
+      example: Maria
+
   securitySchemes:
     BearerAuth:
       type: http

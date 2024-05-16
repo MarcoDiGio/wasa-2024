@@ -100,7 +100,8 @@ func createDatabase(db *sql.DB) error {
 		`CREATE TABLE IF NOT EXISTS photos (
 			photo_id INTEGER PRIMARY KEY AUTOINCREMENT,
 			date DATETIME NOT NULL,
-			author_id VARCHAR(16) NOT NULL
+			author_id VARCHAR(16) NOT NULL,
+			FOREIGN KEY(author_id) REFERENCES users (id_user) ON DELETE CASCADE
 		);`,
 		`CREATE TABLE IF NOT EXISTS comments (
 			comment_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -111,18 +112,20 @@ func createDatabase(db *sql.DB) error {
 			photo_id INTEGER NOT NULL
 		);`,
 		`CREATE TABLE IF NOT EXISTS banned_users (
-			ban_id INTEGER PRIMARY KEY AUTOINCREMENT,
 			banner VARCHAR(16) NOT NULL,
 			banned VARCHAR(16) NOT NULL,
+			PRIMARY KEY(banner, banned),
 			FOREIGN KEY(banner) REFERENCES users (id_user) ON DELETE CASCADE,
-			FOREIGN KEY(banned) REFERENCES users (id_user) ON DELETE CASCADE
+			FOREIGN KEY(banned) REFERENCES users (id_user) ON DELETE CASCADE,
+			CONSTRAINT CHK_ForeignKeysDifferent CHECK (banner <> banned)
 		);`,
 		`CREATE TABLE IF NOT EXISTS follower (
-			follow_id INTEGER PRIMARY KEY AUTOINCREMENT,
 			follower VARCHAR(16) NOT NULL,
 			followed VARCHAR(16) NOT NULL,
+			PRIMARY KEY(follower, followed)
 			FOREIGN KEY(follower) REFERENCES users (id_user) ON DELETE CASCADE,
-			FOREIGN KEY(followed) REFERENCES users (id_user) ON DELETE CASCADE
+			FOREIGN KEY(followed) REFERENCES users (id_user) ON DELETE CASCADE,
+			CONSTRAINT CHK_ForeignKeysDifferent CHECK (follower <> followed)
 		);`,
 	}
 
