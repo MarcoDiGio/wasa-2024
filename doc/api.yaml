@@ -103,19 +103,10 @@ paths:
               schema: { $ref : "#/components/schemas/Identifier" }
               example: 
                 identifier: "abcdef012345"
-  /users/{userName}/followers/{followedId}:
+  /users/{userName}/followers/{followId}:
     parameters: 
       - $ref : "#/components/parameters/username"
-      - in: path
-        name: followedId
-        required: true
-        schema:
-          type: string
-          minLength: 3
-          maxLength: 16
-          pattern: 'ˆ.*?$'
-        description: Follow ID of an user
-        example: "Mario66"
+      - $ref : "#/components/parameters/followId"
     put:
       tags: ["follower"]
       summary: Follow an user
@@ -155,10 +146,11 @@ paths:
       operationId: unfollowUser
       responses: 
         '204': { description: User unfollowed successfully }
-  /users/{userName}/banned:
+  /users/{userName}/banned/{banId}:
     parameters: 
       - $ref : "#/components/parameters/username"
-    post:
+      - $ref : "#/components/parameters/banId"
+    put:
       tags: ["ban"]
       summary: Ban an user
       security:
@@ -187,15 +179,6 @@ paths:
                   - code: 'forbidden'
                     message: 'You are not allowed to do that'
                     more_info: 'You do not have permissions.'
-  /users/{userName}/banned/{banId}:
-    parameters: 
-      - $ref : "#/components/parameters/username"
-      - in: path
-        name: banId
-        required: true
-        schema:
-          type: integer
-        description: Ban ID of an user
     delete:
       tags: ["ban"]
       summary: Unban an user
@@ -220,7 +203,31 @@ paths:
                   - code: 'forbidden'
                     message: 'You are not allowed to do that'
                     more_info: 'You do not have permissions.'
-
+  /users/{userName}/stream:
+    parameters: 
+      - $ref : "#/components/parameters/username"
+    get:
+      tags: ["user stream"]
+      summary: Get stream of content for a user
+      description: |-
+        Get the stream of content
+        for the user name specified
+        in the path.
+      operationId: getMyStream
+      responses: 
+        '200':
+          description: Stream GET action succesful
+          content:
+            application/json:
+              schema: { $ref : "#/components/schemas/Photos" }
+              example:
+                photos:
+                  - photo_id: 1
+                    author_id: "Sfera99"
+                    date: 2023-09-24T17:23:34Z
+                  - photo_id: 2
+                    author_id: "Gue98"
+                    date: 2023-09-24T17:23:34Z
   /users/{userName}/photos:
     parameters: 
       - $ref : "#/components/parameters/username"
@@ -239,9 +246,12 @@ paths:
               schema: { $ref : "#/components/schemas/Photos" }
               example:
                 photos:
-                  - "/public/photo1.png"
-                  - "/public/photo2.png"
-                  - "/public/photo3.png"
+                  - photo_id: 1
+                    author_id: "Sfera99"
+                    date: 2023-09-24T17:23:34Z
+                  - photo_id: 2
+                    author_id: "Gue98"
+                    date: 2023-09-24T17:23:34Z
     post:
       tags: ["user photo"]
       summary: Upload a photo
@@ -266,28 +276,6 @@ paths:
             application/json:
               schema: { $ref : "#/components/schemas/Message" }
               example: { message: "Photo uploaded successfully" }
-  /users/{userName}/stream:
-    parameters: 
-      - $ref : "#/components/parameters/username"
-    get:
-      tags: ["user stream"]
-      summary: Get stream of content for a user
-      description: |-
-        Get the stream of content
-        for the user name specified
-        in the path.
-      operationId: getMyStream
-      responses: 
-        '200':
-          description: Stream GET action succesful
-          content:
-            application/json:
-              schema: { $ref : "#/components/schemas/Photos" }
-              example: 
-                photos:
-                  - "/public/photo1.png"
-                  - "/public/photo2.png"
-                  - "/public/photo3.png"
   /users/{userName}/photos/{photoId}:
     parameters: 
       - $ref : "#/components/parameters/username"
@@ -505,6 +493,29 @@ components:
         maxLength: 16
       description: Session ID of a user
       example: Maria
+    followId: 
+      in: path
+      name: followId
+      required: true
+      schema:
+        type: string
+        minLength: 3
+        maxLength: 16
+        pattern: 'ˆ.*?$'
+      description: Follow ID of an user
+      example: "Mario66"
+    banId:
+      in: path
+      name: banId
+      required: true
+      schema:
+        type: string
+        minLength: 3
+        maxLength: 16
+        pattern: 'ˆ.*?$'
+      description: ID of an user
+      example: "Yasuo99"
+
 
   securitySchemes:
     BearerAuth:
@@ -546,10 +557,9 @@ components:
           description: Array of photos in string format
           type: array
           minItems: 0
-          maxItems: 100000
+          maxItems: 100
           items:
-            type: string
-            pattern: 'ˆ.*?$'
+            $ref : '#/components/schemas/Photo'
     PhotoBin:
       description: |-
         A schema that describes a
@@ -560,6 +570,25 @@ components:
           description: Binary file
           type: string
           format: binary
+          minLength: 0
+          maxLength: 100
+    Photo:
+      description: |-
+        A object that contains all the useful
+        info of a photo object
+      type: object
+      properties: 
+        photo_id:
+          description: Photo unique ID
+          type: integer
+          example: 484
+        author_id:
+          $ref : '#/components/schemas/Identifier/properties/identifier'
+        date:
+          description: DateTime of the uploaded photo
+          type: string
+          format: date-time
+          example: 2023-09-24T17:23:34Z
     Message:
       description: |-
         A schema that describes a 
@@ -619,9 +648,7 @@ components:
           description: Array of photos in string format
           type: array
           minItems: 0
-          maxItems: 100000
+          maxItems: 100
           items:
             type: string
             pattern: 'ˆ.*?$'
-        
-      
