@@ -39,10 +39,14 @@ import (
 // AppDatabase is the high level interface for the DB
 type AppDatabase interface {
 	GetName() (string, error)
-	ChangeUsername(user User) error
+	ChangeUsername(username string, user User) error
 	CheckUser(user User) (bool, error)
 	PostUser(user User) error
 	GetAllUsers() ([]User, error)
+	AddFollower(user1 User, user2 User) error
+	GetFollower(user User) ([]User, error)
+	GetFollowing(user User) ([]User, error)
+	RemoveFollower(follower User, followed User) error
 	Ping() error
 }
 
@@ -51,10 +55,10 @@ type User struct {
 }
 
 type UserProfile struct {
-	ID        uint64
-	Following uint64
-	Followers uint64
-	Photos    []Photo
+	ID         string  `json:"user_id"`
+	Followings []User  `json:"followings"`
+	Followers  []User  `json:"followers"`
+	Photos     []Photo `json:"photos"`
 }
 
 type Photo struct {
@@ -109,7 +113,8 @@ func createDatabase(db *sql.DB) error {
 		);`,
 		`CREATE TABLE IF NOT EXISTS likes (
 			like_id INTEGER PRIMARY KEY AUTOINCREMENT,
-			photo_id INTEGER NOT NULL
+			photo_id INTEGER NOT NULL,
+			FOREIGN KEY(photo_id) REFERENCES photos (photo_id) ON DELETE CASCADE
 		);`,
 		`CREATE TABLE IF NOT EXISTS banned_users (
 			banner VARCHAR(16) NOT NULL,
@@ -119,10 +124,10 @@ func createDatabase(db *sql.DB) error {
 			FOREIGN KEY(banned) REFERENCES users (id_user) ON DELETE CASCADE,
 			CONSTRAINT CHK_ForeignKeysDifferent CHECK (banner <> banned)
 		);`,
-		`CREATE TABLE IF NOT EXISTS follower (
+		`CREATE TABLE IF NOT EXISTS followers (
 			follower VARCHAR(16) NOT NULL,
 			followed VARCHAR(16) NOT NULL,
-			PRIMARY KEY(follower, followed)
+			PRIMARY KEY(follower, followed),
 			FOREIGN KEY(follower) REFERENCES users (id_user) ON DELETE CASCADE,
 			FOREIGN KEY(followed) REFERENCES users (id_user) ON DELETE CASCADE,
 			CONSTRAINT CHK_ForeignKeysDifferent CHECK (follower <> followed)

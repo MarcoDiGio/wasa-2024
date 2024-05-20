@@ -43,11 +43,14 @@ func (db *appdbimpl) GetAllUsers() ([]User, error) {
 		}
 		users = append(users, user)
 	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
 	return users, nil
 }
 
-func (db *appdbimpl) ChangeUsername(user User) error {
-	_, err := db.c.Exec("UPDATE INTO users VALUES (?)", user.ID)
+func (db *appdbimpl) ChangeUsername(username string, user User) error {
+	_, err := db.c.Exec("UPDATE users SET user_id=? WHERE user_id=?", username, user.ID)
 	if err != nil {
 		return err
 	}
