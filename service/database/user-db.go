@@ -1,5 +1,10 @@
 package database
 
+import (
+	"os"
+	"path/filepath"
+)
+
 func (db *appdbimpl) PostUser(u User) error {
 	var exists bool
 	var err error
@@ -50,9 +55,21 @@ func (db *appdbimpl) GetAllUsers() ([]User, error) {
 }
 
 func (db *appdbimpl) ChangeUsername(username string, user User) error {
-	_, err := db.c.Exec("UPDATE users SET user_id=? WHERE user_id=?", username, user.ID)
+	res, err := db.c.Exec("UPDATE users SET user_id=? WHERE user_id=?", username, user.ID)
 	if err != nil {
 		return err
+	}
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected != 0 {
+		// Using filePath for portability
+		path := filepath.Join("/tmp", "/users")
+		err = os.Rename(filepath.Join(path, user.ID), filepath.Join(path, username))
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

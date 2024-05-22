@@ -43,10 +43,13 @@ type AppDatabase interface {
 	CheckUser(user User) (bool, error)
 	PostUser(user User) error
 	GetAllUsers() ([]User, error)
-	AddFollower(user1 User, user2 User) error
+	AddFollower(follower User, followed User) error
 	GetFollower(user User) ([]User, error)
 	GetFollowing(user User) ([]User, error)
 	RemoveFollower(follower User, followed User) error
+	AddBan(banner User, banned User) error
+	RemoveBan(banner User, banned User) error
+	CheckBan(banner User, banned User) (bool, error)
 	Ping() error
 }
 
@@ -62,7 +65,7 @@ type UserProfile struct {
 }
 
 type Photo struct {
-	ID string
+	ID string `json:"photo_id"`
 }
 
 type appdbimpl struct {

@@ -14,12 +14,20 @@ func (rt *_router) getUserProfile(w http.ResponseWriter, r *http.Request, ps htt
 	var err error
 	reqToken := r.Header.Get("Authorization")
 	splitToken := strings.Split(reqToken, "Bearer ")
-	reqUserName := splitToken[1]
-	// @TODO: CHECK IF BANNED
-	println(reqUserName)
-	userName := ps.ByName("userName")
+	reqUserName := splitToken[1]      // marco2
+	userName := ps.ByName("userName") // marco
 	if userName == "" {
 		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	isBanned, err := rt.db.CheckBan(database.User{ID: userName}, database.User{ID: reqUserName})
+	if err != nil {
+		ctx.Logger.WithError(err).Error("Error when checking ban")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	if isBanned {
+		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
