@@ -34,6 +34,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"time"
 )
 
 // AppDatabase is the high level interface for the DB
@@ -50,6 +51,9 @@ type AppDatabase interface {
 	AddBan(banner User, banned User) error
 	RemoveBan(banner User, banned User) error
 	CheckBan(banner User, banned User) (bool, error)
+	AddPhoto(photo Photo) (int64, error)
+	RemovePhoto(photoId string) error
+	GetAllUserPhoto(user User) ([]PhotoDB, error)
 	Ping() error
 }
 
@@ -64,8 +68,15 @@ type UserProfile struct {
 	Photos     []Photo `json:"photos"`
 }
 
+type PhotoDB struct {
+	ID        string    `json:"photo_id"`
+	Author_ID string    `json:"author_id"`
+	Date      time.Time `json:"date"`
+}
+
 type Photo struct {
-	ID string `json:"photo_id"`
+	Author_ID string    `json:"author_id"`
+	Date      time.Time `json:"date"`
 }
 
 type appdbimpl struct {
