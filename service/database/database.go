@@ -34,7 +34,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"time"
 )
 
 // AppDatabase is the high level interface for the DB
@@ -53,30 +52,11 @@ type AppDatabase interface {
 	CheckBan(banner User, banned User) (bool, error)
 	AddPhoto(photo Photo) (int64, error)
 	RemovePhoto(photoId string) error
-	GetAllUserPhoto(user User) ([]PhotoDB, error)
+	GetAllUserPhoto(user User) ([]Photo, error)
+	AddComment(photoId string, user User, comment Comment) (int64, error)
+	RemoveComment(commentId string) error
+	GetCommentsByPhoto(photoId string) ([]Comment, error)
 	Ping() error
-}
-
-type User struct {
-	ID string `json:"user_id"`
-}
-
-type UserProfile struct {
-	ID         string  `json:"user_id"`
-	Followings []User  `json:"followings"`
-	Followers  []User  `json:"followers"`
-	Photos     []Photo `json:"photos"`
-}
-
-type PhotoDB struct {
-	ID        string    `json:"photo_id"`
-	Author_ID string    `json:"author_id"`
-	Date      time.Time `json:"date"`
-}
-
-type Photo struct {
-	Author_ID string    `json:"author_id"`
-	Date      time.Time `json:"date"`
 }
 
 type appdbimpl struct {
@@ -123,7 +103,11 @@ func createDatabase(db *sql.DB) error {
 		);`,
 		`CREATE TABLE IF NOT EXISTS comments (
 			comment_id INTEGER PRIMARY KEY AUTOINCREMENT,
-			photo_id INTEGER NOT NULL
+			photo_id INTEGER NOT NULL,
+			user_id VARCHAR(16) NOT NULL,
+			comment VARCHAR(100) NOT NULL,
+			FOREIGN KEY(user_id) REFERENCES users (user_id) ON DELETE CASCADE,
+			FOREIGN KEY(photo_id) REFERENCES photos (photo_id) ON DELETE CASCADE
 		);`,
 		`CREATE TABLE IF NOT EXISTS likes (
 			like_id INTEGER PRIMARY KEY AUTOINCREMENT,

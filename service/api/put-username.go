@@ -3,7 +3,6 @@ package api
 import (
 	"encoding/json"
 	"net/http"
-	"strings"
 	"wasa-2024-2024851/service/api/reqcontext"
 	"wasa-2024-2024851/service/database"
 
@@ -12,9 +11,7 @@ import (
 
 func (rt *_router) changeUsername(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	var newUser User
-	reqToken := r.Header.Get("Authorization")
-	splitToken := strings.Split(reqToken, "Bearer ")
-	reqToken = splitToken[1]
+	reqToken := getBearerToken(r.Header.Get("Authorization"))
 	pathUsername := ps.ByName("userName")
 	err := json.NewDecoder(r.Body).Decode(&newUser)
 	if err != nil {
@@ -48,5 +45,6 @@ func (rt *_router) changeUsername(w http.ResponseWriter, r *http.Request, ps htt
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(newUser)
 }

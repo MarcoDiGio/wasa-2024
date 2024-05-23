@@ -7,7 +7,6 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
-	"strings"
 	"time"
 	"wasa-2024-2024851/service/api/reqcontext"
 	"wasa-2024-2024851/service/database"
@@ -16,9 +15,7 @@ import (
 )
 
 func (rt *_router) addPhoto(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
-	reqToken := r.Header.Get("Authorization")
-	splitToken := strings.Split(reqToken, "Bearer ")
-	reqToken = splitToken[1]
+	reqToken := getBearerToken(r.Header.Get("Authorization"))
 	pathUsername := ps.ByName("userName")
 	if pathUsername != reqToken {
 		w.WriteHeader(http.StatusUnauthorized)
@@ -43,7 +40,7 @@ func (rt *_router) addPhoto(w http.ResponseWriter, r *http.Request, ps httproute
 
 	// Create a temporary file within our temp-images directory that follows
 	// a particular naming pattern
-	id, err := rt.db.AddPhoto(database.Photo{Author_ID: pathUsername, Date: time.Now()})
+	id, err := rt.db.AddPhoto(Photo.toDatabase(Photo{Author_ID: pathUsername, Date: time.Now()}))
 	if err != nil {
 		ctx.Logger.WithError(err).Error("can't add photo to db")
 		w.WriteHeader(http.StatusInternalServerError)

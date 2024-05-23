@@ -82,6 +82,8 @@ paths:
     put:
       tags: ["username"]
       summary: Sets the user name
+      security: 
+        - BearerAuth: []
       description: |-
         Change the actual user name to the one
         specified in the body and return a new
@@ -96,7 +98,7 @@ paths:
               name: Maria
         required: true
       responses:
-        '201':
+        '200':
           description: Set user name action successful
           content:
             application/json:
@@ -138,6 +140,8 @@ paths:
     delete:
       tags: ["follower"]
       summary: Unfollow an user
+      security: 
+        - BearerAuth: []
       description: |- 
         The user contained in the path
         will be unfollowed by the 

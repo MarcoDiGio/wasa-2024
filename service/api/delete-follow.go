@@ -2,7 +2,6 @@ package api
 
 import (
 	"net/http"
-	"strings"
 	"wasa-2024-2024851/service/api/reqcontext"
 	"wasa-2024-2024851/service/database"
 
@@ -10,9 +9,7 @@ import (
 )
 
 func (rt *_router) deleteFollower(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
-	reqToken := r.Header.Get("Authorization")
-	splitToken := strings.Split(reqToken, "Bearer ")
-	userFollower := splitToken[1]
+	userFollower := getBearerToken(r.Header.Get("Authorization"))
 	pathUserToUnfollow := ps.ByName("userName")
 	pathFollowerId := ps.ByName("followerId")
 	if userFollower != pathFollowerId {

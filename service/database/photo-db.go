@@ -31,16 +31,16 @@ func (db *appdbimpl) CheckPhoto(photoId string) (bool, error) {
 	return exists, err
 }
 
-func (db *appdbimpl) GetAllUserPhoto(user User) ([]PhotoDB, error) {
-	var photos = make([]PhotoDB, 0)
+func (db *appdbimpl) GetAllUserPhoto(user User) ([]Photo, error) {
+	var photos = make([]Photo, 0)
 	rows, err := db.c.Query("SELECT * FROM photos WHERE author_id=? ORDER BY date DESC", user.ID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var photo PhotoDB
-		if err := rows.Scan(&photo.ID, &photo.Date, &photo.Author_ID); err != nil {
+		var photo Photo
+		if err := rows.Scan(&photo.Photo_ID, &photo.Date, &photo.Author_ID); err != nil {
 			return nil, err
 		}
 		photos = append(photos, photo)

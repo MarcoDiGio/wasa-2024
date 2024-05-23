@@ -16,7 +16,7 @@ func (rt *_router) postSession(w http.ResponseWriter, r *http.Request, ps httpro
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
-	} else if !user.isValid() {
+	} else if !isValid(user) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -35,6 +35,6 @@ func (rt *_router) postSession(w http.ResponseWriter, r *http.Request, ps httpro
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
 	_ = json.NewEncoder(w).Encode(user)
-
 }

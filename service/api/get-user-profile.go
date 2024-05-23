@@ -3,7 +3,6 @@ package api
 import (
 	"encoding/json"
 	"net/http"
-	"strings"
 	"wasa-2024-2024851/service/api/reqcontext"
 	"wasa-2024-2024851/service/database"
 
@@ -12,14 +11,8 @@ import (
 
 func (rt *_router) getUserProfile(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	var err error
-	reqToken := r.Header.Get("Authorization")
-	splitToken := strings.Split(reqToken, "Bearer ")
-	reqUserName := splitToken[1]
+	reqUserName := getBearerToken(r.Header.Get("Authorization"))
 	userName := ps.ByName("userName")
-	if userName == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
 	exists, err := rt.db.CheckUser(database.User{ID: userName})
 	if err != nil {
 		ctx.Logger.WithError(err).Error("Error when checking if user exists")
@@ -52,15 +45,18 @@ func (rt *_router) getUserProfile(w http.ResponseWriter, r *http.Request, ps htt
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	_ = json.NewEncoder(w).Encode(database.UserProfile{ID: userName, Followings: followings, Followers: followers})
 }
 
 func (rt *_router) getAllUsers(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	users, err := rt.db.GetAllUsers()
 	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 		ctx.Logger.WithError(err).Error("can't retrieve the users")
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	_ = json.NewEncoder(w).Encode(users)
 }

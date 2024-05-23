@@ -1,17 +1,46 @@
 package api
 
-import "wasa-2024-2024851/service/database"
+import (
+	"time"
+	"wasa-2024-2024851/service/database"
+)
 
 type User struct {
 	ID string `json:"user_id"`
 }
 
-func (u *User) toDatabase() database.User {
+type Photo struct {
+	Photo_ID  string    `json:"photo_ID"`
+	Author_ID string    `json:"author_id"`
+	Date      time.Time `json:"date"`
+}
+
+type Comment struct {
+	Comment_ID string `json:"comment_id"`
+	Photo_ID   string `json:"photo_id"`
+	User_ID    string `json:"user_id"`
+	Comment    string `json:"content"`
+}
+
+func (user User) toDatabase() database.User {
 	return database.User{
-		ID: u.ID,
+		ID: user.ID,
 	}
 }
 
-func (u *User) isValid() bool {
-	return len(u.ID) >= 3 && len(u.ID) <= 16
+func (photo Photo) toDatabase() database.Photo {
+	return database.Photo{
+		Photo_ID:  photo.Photo_ID,
+		Author_ID: photo.Author_ID,
+		Date:      photo.Date,
+	}
+}
+
+func (comment Comment) toDatabase() database.Comment {
+	return database.Comment{
+		Comment_ID: comment.Comment_ID,
+		Photo_ID:   comment.Photo_ID,
+		User_ID:    comment.User_ID,
+		Comment:    comment.Comment,
+	}
 }

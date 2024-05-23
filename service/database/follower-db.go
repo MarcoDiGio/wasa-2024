@@ -24,6 +24,9 @@ func (db *appdbimpl) GetFollower(user User) ([]User, error) {
 		}
 		followers = append(followers, follower)
 	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
 	return followers, nil
 }
 
@@ -41,6 +44,9 @@ func (db *appdbimpl) GetFollowing(user User) ([]User, error) {
 			return nil, err
 		}
 		followings = append(followings, following)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
 	}
 	return followings, nil
 }

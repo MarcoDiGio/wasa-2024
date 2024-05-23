@@ -4,16 +4,13 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strings"
 	"wasa-2024-2024851/service/api/reqcontext"
 
 	"github.com/julienschmidt/httprouter"
 )
 
 func (rt *_router) removePhoto(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
-	reqToken := r.Header.Get("Authorization")
-	splitToken := strings.Split(reqToken, "Bearer ")
-	reqToken = splitToken[1]
+	reqToken := getBearerToken(r.Header.Get("Authorization"))
 	pathUsername := ps.ByName("userName")
 	pathPhotoId := ps.ByName("photoId")
 	if pathUsername != reqToken {

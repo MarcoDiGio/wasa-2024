@@ -2,7 +2,6 @@ package api
 
 import (
 	"net/http"
-	"strings"
 	"wasa-2024-2024851/service/api/reqcontext"
 	"wasa-2024-2024851/service/database"
 
@@ -10,9 +9,7 @@ import (
 )
 
 func (rt *_router) deleteBan(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
-	reqToken := r.Header.Get("Authorization")
-	splitToken := strings.Split(reqToken, "Bearer ")
-	userBanner := splitToken[1]
+	userBanner := getBearerToken(r.Header.Get("Authorization"))
 	pathBannerId := ps.ByName("userName")
 	pathUnbannedId := ps.ByName("bannedId")
 	if userBanner != pathBannerId {
