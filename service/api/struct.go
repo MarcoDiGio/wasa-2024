@@ -19,7 +19,7 @@ type Comment struct {
 	Comment_ID string `json:"comment_id"`
 	Photo_ID   string `json:"photo_id"`
 	User_ID    string `json:"user_id"`
-	Comment    string `json:"content"`
+	Comment    string `json:"comment"`
 }
 
 func (user User) toDatabase() database.User {

@@ -19,8 +19,9 @@ func (rt *_router) addComment(w http.ResponseWriter, r *http.Request, ps httprou
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
-	err := json.NewDecoder(r.Body).Decode(&comment.Comment)
+	err := json.NewDecoder(r.Body).Decode(&comment)
 	if err != nil {
+		ctx.Logger.WithError(err).Error("could not decode the body")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -35,6 +36,6 @@ func (rt *_router) addComment(w http.ResponseWriter, r *http.Request, ps httprou
 	comment.User_ID = user.ID
 	comment.Comment_ID = strconv.FormatInt(commentId, 10)
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(comment)
 	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(comment)
 }

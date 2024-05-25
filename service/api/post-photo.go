@@ -9,7 +9,6 @@ import (
 	"strconv"
 	"time"
 	"wasa-2024-2024851/service/api/reqcontext"
-	"wasa-2024-2024851/service/database"
 
 	"github.com/julienschmidt/httprouter"
 )
@@ -40,13 +39,14 @@ func (rt *_router) addPhoto(w http.ResponseWriter, r *http.Request, ps httproute
 
 	// Create a temporary file within our temp-images directory that follows
 	// a particular naming pattern
-	id, err := rt.db.AddPhoto(Photo.toDatabase(Photo{Author_ID: pathUsername, Date: time.Now()}))
+	timeNow := time.Now()
+	photoId, err := rt.db.AddPhoto(Photo.toDatabase(Photo{Author_ID: pathUsername, Date: timeNow}))
 	if err != nil {
 		ctx.Logger.WithError(err).Error("can't add photo to db")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	tempFile, err := os.Create(filepath.Join("/tmp", "/users", pathUsername, "/photos", strconv.FormatInt(id, 10)))
+	tempFile, err := os.Create(filepath.Join("/tmp", "/users", pathUsername, "/photos", strconv.FormatInt(photoId, 10)))
 	if err != nil {
 		ctx.Logger.WithError(err).Error("can't create image")
 		w.WriteHeader(http.StatusInternalServerError)
@@ -63,6 +63,7 @@ func (rt *_router) addPhoto(w http.ResponseWriter, r *http.Request, ps httproute
 	}
 	// write this byte array to our temporary file
 	tempFile.Write(fileBytes)
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(database.Photo{Author_ID: strconv.FormatInt(id, 10), Date: time.Now()})
+	json.NewEncoder(w).Encode(Photo.toDatabase(Photo{Photo_ID: strconv.FormatInt(photoId, 10), Author_ID: pathUsername, Date: timeNow}))
 }

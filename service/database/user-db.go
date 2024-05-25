@@ -73,3 +73,23 @@ func (db *appdbimpl) ChangeUsername(username string, user User) error {
 	}
 	return nil
 }
+
+func (db *appdbimpl) SearchUser(user User) ([]User, error) {
+	var users = make([]User, 0)
+	rows, err := db.c.Query("SELECT * WHERE user_id LIKE %?%", user.ID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var user User
+		if err := rows.Scan(&user.ID); err != nil {
+			return nil, err
+		}
+		users = append(users, user)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+	return users, nil
+}
