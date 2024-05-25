@@ -61,6 +61,9 @@ type AppDatabase interface {
 	RemoveComment(commentId string) error
 	GetCommentsByPhoto(photoId string) ([]Comment, error)
 
+	AddLike(user User, photoId string) error
+	RemoveLike(user User, photoId string) error
+
 	Ping() error
 }
 
@@ -115,8 +118,10 @@ func createDatabase(db *sql.DB) error {
 			FOREIGN KEY(photo_id) REFERENCES photos (photo_id) ON DELETE CASCADE
 		);`,
 		`CREATE TABLE IF NOT EXISTS likes (
-			like_id INTEGER PRIMARY KEY AUTOINCREMENT,
+			liker_id VARCHAR(16) NOT NULL,
 			photo_id INTEGER NOT NULL,
+			PRIMARY KEY(liker_id, photo_id),
+			FOREIGN KEY(liker_id) REFERENCES users (user_id) ON DELETE CASCADE,
 			FOREIGN KEY(photo_id) REFERENCES photos (photo_id) ON DELETE CASCADE
 		);`,
 		`CREATE TABLE IF NOT EXISTS banned_users (
