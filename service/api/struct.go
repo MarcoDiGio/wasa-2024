@@ -44,3 +44,11 @@ func (comment Comment) toDatabase() database.Comment {
 		Comment:    comment.Comment,
 	}
 }
+
+func fromDatabase(photo database.Photo) Photo {
+	return Photo{
+		Photo_ID:  photo.Photo_ID,
+		Author_ID: photo.Author_ID,
+		Date:      photo.Date,
+	}
+}

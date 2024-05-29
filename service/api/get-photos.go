@@ -11,7 +11,7 @@ import (
 func (rt *_router) getPhotos(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	userName := ps.ByName("userName")
 	var user = User{ID: userName}
-	photos, err := rt.db.GetAllUserPhoto(user.toDatabase())
+	photos, err := rt.db.GetAllUserPhotos(user.toDatabase())
 	if err != nil {
 		ctx.Logger.WithError(err).Error("can't retrieve the photos")
 		return

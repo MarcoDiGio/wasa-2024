@@ -13,6 +13,7 @@ func (rt *_router) Handler() http.Handler {
 	rt.router.GET("/users", rt.wrap(rt.getAllUsers))
 	rt.router.GET("/users/:userName", rt.wrap(rt.getUserProfile))
 	rt.router.PUT("/users/:userName", rt.wrap(rt.changeUsername))
+	rt.router.GET("/users/:userName/stream", rt.wrap(rt.getStream))
 	rt.router.PUT("/users/:userName/followers/:followerId", rt.wrap(rt.addFollower))
 	rt.router.DELETE("/users/:userName/followers/:followerId", rt.wrap(rt.deleteFollower))
 	rt.router.PUT("/users/:userName/banned/:bannedId", rt.wrap(rt.addBan))

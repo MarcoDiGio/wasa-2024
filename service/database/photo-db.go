@@ -31,9 +31,29 @@ func (db *appdbimpl) CheckPhoto(photoId string) (bool, error) {
 	return exists, err
 }
 
-func (db *appdbimpl) GetAllUserPhoto(user User) ([]Photo, error) {
+func (db *appdbimpl) GetAllUserPhotos(user User) ([]Photo, error) {
 	var photos = make([]Photo, 0)
 	rows, err := db.c.Query("SELECT * FROM photos WHERE author_id=? ORDER BY date DESC", user.ID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var photo Photo
+		if err := rows.Scan(&photo.Photo_ID, &photo.Date, &photo.Author_ID); err != nil {
+			return nil, err
+		}
+		photos = append(photos, photo)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+	return photos, nil
+}
+
+func (db *appdbimpl) GetAllFollowingPhotos(user User) ([]Photo, error) {
+	var photos = make([]Photo, 0)
+	rows, err := db.c.Query("SELECT * FROM photos WHERE author_id IN (SELECT followed FROM followers WHERE follower=?) ORDER BY date DESC", user.ID)
 	if err != nil {
 		return nil, err
 	}
