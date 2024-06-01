@@ -213,11 +213,14 @@ paths:
     get:
       tags: ["user stream"]
       summary: Get stream of content for a user
+      security: 
+        - BearerAuth: []
       description: |-
         Get the stream of content
         for the user name specified
         in the path.
       operationId: getMyStream
+      
       responses: 
         '200':
           description: Stream GET action succesful
