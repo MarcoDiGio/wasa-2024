@@ -2,9 +2,14 @@
 export default {
 	data: function() {
 		return {
-			errormsg: null,
+			errormsg: "",
 			loading: false,
 			some_data: null,
+			posts: [],
+			users: [],
+			activeUser: "",
+			searchResults: [],
+			userToSearch: "",
 		}
 	},
 	methods: {
@@ -19,10 +24,47 @@ export default {
 			}
 			this.loading = false;
 		},
+		async newItem() {
+			try {
+				let response = await this.$axios.get("/users");
+				this.users = response.data;
+			} catch (e) {
+				this.errormsg = e.toString();
+			}
+		},
+		async getActiveUser() {
+			this.activeUser = localStorage.getItem("token") || "";
+		},
+		async searchUser() {
+			try {
+				let response = await this.$axios.get("/users");
+				// @TODO: IMPLEMENT USERS SEARCH ON BACKEND
+				//let response = await this.$axios.get("/users/search");
+				this.searchResults = response.data;
+			} catch (e) {
+				this.errormsg = e.toString();
+			}
+		},
+		async getStream() {
+			try {
+				let response = await this.$axios.get(`/users/${this.activeUser}/stream`, {
+					headers: { "Authorization": `Bearer ${this.activeUser}` },
+				});
+				this.users = response.data;
+			} catch (e) {
+				this.errormsg = e.toString();
+			}
+		}
 	},
 	mounted() {
-		this.refresh()
-	}
+		this.getActiveUser();
+		if (this.activeUser !== "") {
+			this.getStream()
+		} else {
+			this.$router.replace('/login')
+		}
+	},
+
 }
 </script>
 
@@ -47,8 +89,17 @@ export default {
 				</div>
 			</div>
 		</div>
+		<div v-for="user in searchResults">
+			<p>{{ user.user_id }}</p>
+		</div>
 
 		<ErrorMsg v-if="errormsg" :msg="errormsg"></ErrorMsg>
+	</div>
+	<div>
+		<h3>Hello, {{ activeUser }}</h3>
+		<form @submit.prevent="searchUser">
+			<input type="text" pattern="[a-zA-Z0-9]{3,16}" v-model="userToSearch" placeholder="Search an user..." />
+		</form>
 	</div>
 </template>
 
