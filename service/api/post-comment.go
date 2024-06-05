@@ -10,7 +10,7 @@ import (
 )
 
 func (rt *_router) addComment(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
-	pathUsername := ps.ByName("userName")
+	// pathUsername := ps.ByName("userName")
 	pathPhotoId := ps.ByName("photoId")
 	reqToken := getBearerToken(r.Header.Get("Authorization"))
 	var comment Comment
@@ -25,7 +25,7 @@ func (rt *_router) addComment(w http.ResponseWriter, r *http.Request, ps httprou
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	println(pathUsername)
+	// @TODO: CHECK IF COMMENTER IS BANNED
 	commentId, err := rt.db.AddComment(pathPhotoId, user.toDatabase(), comment.toDatabase())
 	if err != nil {
 		ctx.Logger.WithError(err).Error("could not add the comment")
@@ -37,5 +37,10 @@ func (rt *_router) addComment(w http.ResponseWriter, r *http.Request, ps httprou
 	comment.Comment_ID = strconv.FormatInt(commentId, 10)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(comment)
+	err = json.NewEncoder(w).Encode(comment)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		ctx.Logger.WithError(err).Error("couldn't convert go values to JSON")
+		return
+	}
 }

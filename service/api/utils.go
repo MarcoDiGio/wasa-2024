@@ -4,6 +4,9 @@ import "strings"
 
 func getBearerToken(authenticationHeader string) string {
 	splitToken := strings.Split(authenticationHeader, "Bearer ")
+	if len(splitToken) < 2 {
+		return ""
+	}
 	return splitToken[1]
 }
 

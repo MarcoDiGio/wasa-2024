@@ -17,5 +17,10 @@ func (rt *_router) getPhotos(w http.ResponseWriter, r *http.Request, ps httprout
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
-	_ = json.NewEncoder(w).Encode(photos)
+	err = json.NewEncoder(w).Encode(photos)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		ctx.Logger.WithError(err).Error("couldn't convert go values to JSON")
+		return
+	}
 }

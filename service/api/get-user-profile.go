@@ -46,7 +46,12 @@ func (rt *_router) getUserProfile(w http.ResponseWriter, r *http.Request, ps htt
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	_ = json.NewEncoder(w).Encode(database.UserProfile{ID: userName, Followings: followings, Followers: followers})
+	err = json.NewEncoder(w).Encode(database.UserProfile{ID: userName, Followings: followings, Followers: followers})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		ctx.Logger.WithError(err).Error("couldn't convert go values to JSON")
+		return
+	}
 }
 
 func (rt *_router) getAllUsers(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {

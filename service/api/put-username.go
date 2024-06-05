@@ -46,5 +46,10 @@ func (rt *_router) changeUsername(w http.ResponseWriter, r *http.Request, ps htt
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(newUser)
+	err = json.NewEncoder(w).Encode(newUser)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		ctx.Logger.WithError(err).Error("couldn't convert go values to JSON")
+		return
+	}
 }

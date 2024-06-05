@@ -29,5 +29,9 @@ func (rt *_router) getStream(w http.ResponseWriter, r *http.Request, ps httprout
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(photos)
+	err = json.NewEncoder(w).Encode(photos)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		ctx.Logger.WithError(err).Error("couldn't convert go values to JSON")
+	}
 }

@@ -9,7 +9,7 @@ import (
 
 func (rt *_router) addLike(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	userLiker := getBearerToken(r.Header.Get("Authorization"))
-	//pathAuthorID := ps.ByName("userName")
+	// pathAuthorID := ps.ByName("userName")
 	pathPhotoID := ps.ByName("photoId")
 	pathUserLiker := ps.ByName("likeId")
 	if pathUserLiker != userLiker {
