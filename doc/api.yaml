@@ -62,12 +62,27 @@ paths:
             application/json:
               schema: { $ref : "#/components/schemas/Profile" }
               example:
-                following: 15
-                followers: 15
+                following:
+                  - user_id: "MichaelJackson"
+                  - user_id: "IndianaJones"
+                followers: 
+                  - user_id: "Coez"
+                  - user_id: "MaraFrascarelli"
                 photos:
                   - "/public/photo1.png"
                   - "/public/photo2.png"
                   - "/public/photo3.png"
+        '403':
+          description: Action is forbidden
+          content:
+            application/json:
+              schema: { $ref : "#/components/schemas/ErrorContainer" }
+              example:
+                trace: AAAAAAAA-BBBB-CCCC-DDDD-FFFFFFFFFFFF
+                errors:
+                  - code: 'forbidden'
+                    message: 'This action is forbidden'
+                    more_info: 'You may not be authorized to do that'
         '404':
           description: User does not exist
           content:
@@ -220,7 +235,6 @@ paths:
         for the user name specified
         in the path.
       operationId: getMyStream
-      
       responses: 
         '200':
           description: Stream GET action succesful
@@ -493,33 +507,21 @@ components:
       in: path
       name: userName
       required: true
-      schema:
-        type: string
-        pattern: 'ˆ.*?$'
-        minLength: 3
-        maxLength: 16
+      schema: { $ref: '#/components/schemas/Username/properties/name' }
       description: Session ID of a user
       example: Maria
     followId: 
       in: path
       name: followId
       required: true
-      schema:
-        type: string
-        minLength: 3
-        maxLength: 16
-        pattern: 'ˆ.*?$'
+      schema: { $ref: '#/components/schemas/Username/properties/name' }
       description: Follow ID of an user
       example: "Mario66"
     banId:
       in: path
       name: banId
       required: true
-      schema:
-        type: string
-        minLength: 3
-        maxLength: 16
-        pattern: 'ˆ.*?$'
+      schema: { $ref: '#/components/schemas/Username/properties/name' }
       description: ID of an user
       example: "Yasuo99"
 
@@ -536,8 +538,6 @@ components:
       type: object
       properties:
         identifier:
-        # change here if you decide to use an integer
-        # or any other type of identifier
           description: Unique ID of an user
           type: string
           example: "abcdef012345"
@@ -550,10 +550,10 @@ components:
         name:
           description: Name of an user
           type: string
-          pattern: 'ˆ.*?$'
-          example: Maria
           minLength: 3
           maxLength: 16
+          pattern: '^.*?$'
+          example: 'Maria'
     Photos:
       description: |-
         A schema that describes
@@ -645,12 +645,8 @@ components:
       description: Profile of an user
       type: object
       properties:
-        following:
-          description: An integer describing the following
-          type: integer
-        followers:
-          description: An integer describing the followers
-          type: integer
+        following: { $ref: "#/components/schemas/Following" }
+        followers: { $ref: "#/components/schemas/Following" }
         photos:
           description: Array of photos in string format
           type: array
@@ -658,4 +654,16 @@ components:
           maxItems: 100
           items:
             type: string
-            pattern: 'ˆ.*?$'
+            pattern: '^.*?$'
+    Following:
+      description: Array of user that are following
+      type: array
+      minItems: 0
+      maxItems: 999
+      items: { $ref: "#/components/schemas/User" }
+    User:
+      description: Info about an user such as User ID
+      type: object
+      properties:
+        user_id: { $ref: "#/components/schemas/Username/properties/name" }
+
