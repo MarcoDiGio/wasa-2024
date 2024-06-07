@@ -70,14 +70,15 @@ paths:
                   - user_id: "MaraFrascarelli"
                 photos:
                   - photo_id: 1
-                    author_id: GabrieleLorenzini
+                    author_id: "GabrieleLorenzini"
                     date: 2023-09-24T17:23:34Z
                   - photo_id: 2
-                    author_id: DavideFrattafalso
+                    author_id: "DavideFrattafalso"
                     date: 2023-09-24T17:33:34Z
         '401': { $ref : "#/components/responses/Unauthorized" }
         '403': { $ref : "#/components/responses/Forbidden" }
         '404': { $ref : "#/components/responses/NotFound" }
+        '500': { $ref : "#/components/responses/InternalServerError" }
     put:
       tags: ["username"]
       summary: Sets the user name
@@ -105,6 +106,7 @@ paths:
               example: 
                 identifier: "abcdef012345"
         '409': { $ref : "#/components/responses/Conflict" }
+        '500': { $ref : "#/components/responses/InternalServerError" }
   /users/{userName}/followers/{followId}:
     parameters: 
       - $ref : "#/components/parameters/username"
@@ -122,6 +124,7 @@ paths:
       responses:
         '204': { $ref : "#/components/responses/NoContent" }
         '404': { $ref : "#/components/responses/NotFound" }
+        '500': { $ref : "#/components/responses/InternalServerError" }
     delete:
       tags: ["follower"]
       summary: Unfollow an user
@@ -135,6 +138,7 @@ paths:
       operationId: unfollowUser
       responses: 
         '204': { $ref : "#/components/responses/NoContent" }
+        '500': { $ref : "#/components/responses/InternalServerError" }
   /users/{userName}/banned/{banId}:
     parameters: 
       - $ref : "#/components/parameters/username"
@@ -153,6 +157,7 @@ paths:
       responses: 
         '204': { $ref : "#/components/responses/NoContent" }
         '403': { $ref : "#/components/responses/Forbidden" }
+        '500': { $ref : "#/components/responses/InternalServerError" }
     delete:
       tags: ["ban"]
       summary: Unban an user
@@ -167,6 +172,7 @@ paths:
       responses: 
         '204': { $ref : "#/components/responses/NoContent" }
         '403': { $ref : "#/components/responses/Forbidden" }
+        '500': { $ref : "#/components/responses/InternalServerError" }
   /users/{userName}/stream:
     parameters: 
       - $ref : "#/components/parameters/username"
@@ -195,6 +201,7 @@ paths:
                     author_id: "Gue98"
                     date: 2023-09-24T17:23:34Z
         '403': { $ref : "#/components/responses/Forbidden" }
+        '500': { $ref : "#/components/responses/InternalServerError" }
   /users/{userName}/photos:
     parameters: 
       - $ref : "#/components/parameters/username"
@@ -220,6 +227,7 @@ paths:
                     author_id: "Gue98"
                     date: 2023-09-24T17:23:34Z
         '403': { $ref : "#/components/responses/Forbidden" }
+        '500': { $ref : "#/components/responses/InternalServerError" }
     post:
       tags: ["user photo"]
       summary: Upload a photo
@@ -247,6 +255,7 @@ paths:
                 photo_id: 1
                 author_id: Roberto4Coni
                 date: 2023-09-24T17:23:34Z
+        '500': { $ref : "#/components/responses/InternalServerError" }
   /users/{userName}/photos/{photoId}:
     parameters: 
       - $ref : "#/components/parameters/username"
@@ -268,29 +277,11 @@ paths:
         by photoID the delete is successful.
       operationId: deletePhoto
       responses:
-        '204': { description: Photo deleted successfully }
+        '204': { $ref : "#/components/responses/NoContent" }
         '400': { $ref : "#/components/responses/BadRequest" }
         '403': { $ref : "#/components/responses/Forbidden" }
         '404': { $ref : "#/components/responses/NotFound" }
-  # /users/{userName}/photos/{photoId}/likes:
-  #   parameters:
-  #     - in: path
-  #       name: userName
-  #       required: true
-  #       schema:
-  #         type: string
-  #         pattern: 'ˆ.*?$'
-  #         minLength: 3
-  #         maxLength: 16
-  #       description: Session ID of a user
-  #       example: Maria
-  #     - in: path
-  #       name: photoId
-  #       required: true
-  #       schema:
-  #         type: integer
-  #       description: Integer ID of the user's photo
-  #       example: 1
+        '500': { $ref : "#/components/responses/InternalServerError" }
   /users/{userName}/photos/{photoId}/likes/{likeId}:
     parameters: 
       - $ref : "#/components/parameters/username"
@@ -335,6 +326,7 @@ paths:
       responses:
         '204': { $ref : "#/components/responses/NoContent" }
         '404': { $ref : "#/components/responses/NotFound" }
+        '500': { $ref : "#/components/responses/InternalServerError" }
     
   /users/{userName}/photos/{photoId}/comments:
     parameters: 
@@ -360,6 +352,7 @@ paths:
       responses:
         '201': { $ref : "#/components/responses/NoContent" }
         '404': { $ref : "#/components/responses/NotFound" }
+        '500': { $ref : "#/components/responses/InternalServerError" }
   /users/{userName}/photos/{photoId}/comments/{commentId}:
     parameters: 
       - $ref : "#/components/parameters/username"
@@ -390,6 +383,7 @@ paths:
       operationId: uncommentPhoto
       responses:
         '204': { $ref : "#/components/responses/NoContent" }
+        '500': { $ref : "#/components/responses/InternalServerError" }
       
 components:
   parameters:
@@ -504,18 +498,11 @@ components:
       description: Profile of an user
       type: object
       properties:
-        following: { $ref: "#/components/schemas/Following" }
-        followers: { $ref: "#/components/schemas/Following" }
-        photos:
-          description: Array of photos in string format
-          type: array
-          minItems: 0
-          maxItems: 100
-          items:
-            type: string
-            pattern: '^.*?$'
-    Following:
-      description: Array of user that are following
+        following: { $ref: "#/components/schemas/Follow" }
+        followers: { $ref: "#/components/schemas/Follow" }
+        photos: { $ref: "#/components/schemas/Photos/properties/photos" }
+    Follow:
+      description: Array of user that are followers or following
       type: array
       minItems: 0
       maxItems: 999
