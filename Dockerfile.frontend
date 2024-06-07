@@ -1,0 +1,11 @@
+# BUILD IT USING docker build -t wasaphoto-frontend:latest -f Dockerfile.frontend .
+# RUN IT USING docker run -it -p 8080:80 --rm wasaphoto-frontend:latest
+
+FROM node:lts as compiler
+WORKDIR /src/
+COPY webui .
+RUN npm run build-prod
+
+FROM nginx:stable
+COPY --from=compiler /src/dist /usr/share/nginx/html
+# CMD AND EXPOSE ARE ALREADY ON NGINX CONTAINER
