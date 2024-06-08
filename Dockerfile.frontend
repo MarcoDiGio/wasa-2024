@@ -3,9 +3,10 @@
 
 FROM node:lts as compiler
 WORKDIR /src/
-COPY webui .
+COPY webui webui
+WORKDIR /src/webui
 RUN npm run build-prod
 
 FROM nginx:stable
-COPY --from=compiler /src/dist /usr/share/nginx/html
+COPY --from=compiler /src/webui/dist /usr/share/nginx/html
 # CMD AND EXPOSE ARE ALREADY ON NGINX CONTAINER
