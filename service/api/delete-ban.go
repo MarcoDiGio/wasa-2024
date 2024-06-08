@@ -13,7 +13,7 @@ func (rt *_router) deleteBan(w http.ResponseWriter, r *http.Request, ps httprout
 	pathBannerId := ps.ByName("userName")
 	pathUnbannedId := ps.ByName("bannedId")
 	if userBanner != pathBannerId {
-		w.WriteHeader(http.StatusUnauthorized)
+		w.WriteHeader(http.StatusForbidden)
 		return
 	}
 	err := rt.db.RemoveBan(database.User{ID: userBanner}, database.User{ID: pathUnbannedId})

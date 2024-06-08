@@ -54,6 +54,7 @@ func (rt *_router) getUserProfile(w http.ResponseWriter, r *http.Request, ps htt
 	}
 }
 
+// REMEMBER TO DELETE THIS
 func (rt *_router) getAllUsers(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	users, err := rt.db.GetAllUsers()
 	if err != nil {
@@ -63,5 +64,10 @@ func (rt *_router) getAllUsers(w http.ResponseWriter, r *http.Request, ps httpro
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	_ = json.NewEncoder(w).Encode(users)
+	err = json.NewEncoder(w).Encode(users)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		ctx.Logger.WithError(err).Error("couldn't convert go values to JSON")
+		return
+	}
 }

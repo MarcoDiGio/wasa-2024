@@ -3,6 +3,8 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+	"os"
+	"path/filepath"
 	"wasa-2024-2024851/service/api/reqcontext"
 	"wasa-2024-2024851/service/database"
 
@@ -25,7 +27,7 @@ func (rt *_router) changeUsername(w http.ResponseWriter, r *http.Request, ps htt
 		return
 	}
 	if pathUsername != reqToken {
-		w.WriteHeader(http.StatusUnauthorized)
+		w.WriteHeader(http.StatusForbidden)
 		return
 	}
 	exists, err := rt.db.CheckUser(newUser.toDatabase())
@@ -35,12 +37,20 @@ func (rt *_router) changeUsername(w http.ResponseWriter, r *http.Request, ps htt
 		return
 	}
 	if exists {
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusConflict)
 		return
 	}
 	err = rt.db.ChangeUsername(newUser.ID, database.User{ID: pathUsername})
 	if err != nil {
 		ctx.Logger.WithError(err).Error("can't change the username")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	oldPath := filepath.Join("/tmp", "/users", pathUsername)
+	newPath := filepath.Join("/tmp", "/users", newUser.ID)
+	err = os.Rename(oldPath, newPath)
+	if err != nil {
+		ctx.Logger.WithError(err).Error("can't rename directory")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

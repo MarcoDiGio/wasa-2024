@@ -20,19 +20,14 @@ func (rt *_router) addPhoto(w http.ResponseWriter, r *http.Request, ps httproute
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
-	file, handler, err := r.FormFile("file")
+	file, _, err := r.FormFile("file")
 	if err != nil {
 		ctx.Logger.WithError(err).Error("Error when getting file")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 	defer file.Close()
-	println("Uploaded File: ", handler.Filename)
-	println("File Size: ", handler.Size)
-	println("MIME Header: ", handler.Header)
 
-	// Create a temporary file within our temp-images directory that follows
-	// a particular naming pattern
 	timeNow := time.Now()
 	photoId, err := rt.db.AddPhoto(Photo.toDatabase(Photo{Author_ID: pathUsername, Date: timeNow}))
 	if err != nil {
@@ -56,7 +51,11 @@ func (rt *_router) addPhoto(w http.ResponseWriter, r *http.Request, ps httproute
 		return
 	}
 	// write this byte array to our temporary file
-	tempFile.Write(fileBytes)
+	_, err = tempFile.Write(fileBytes)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	err = json.NewEncoder(w).Encode(Photo.toDatabase(Photo{Photo_ID: strconv.FormatInt(photoId, 10), Author_ID: pathUsername, Date: timeNow}))
