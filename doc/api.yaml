@@ -421,6 +421,11 @@ components:
       description: Response with status code 404 (HTTP Not Found)
     Conflict:
       description: Response with status code 409 (HTTP Conflict)
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/User" }
+          example:
+            user_id: "yasuo"
     InternalServerError:
       description: Response with status code 500 (HTTP Internal Server Error)
 
@@ -512,4 +517,9 @@ components:
       type: object
       properties:
         user_id: { $ref: "#/components/schemas/Username/properties/name" }
-
+    Users:
+      description: An array of users
+      type: array
+      minItems: 0
+      maxItems: 100
+      items: { $ref: "#/components/schemas/User" }
