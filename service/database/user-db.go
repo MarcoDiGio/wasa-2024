@@ -76,7 +76,7 @@ func (db *appdbimpl) ChangeUsername(username string, user User) error {
 
 func (db *appdbimpl) SearchUser(user User) ([]User, error) {
 	var users = make([]User, 0)
-	rows, err := db.c.Query("SELECT * WHERE user_id LIKE %?%", user.ID)
+	rows, err := db.c.Query("SELECT * FROM users WHERE user_id LIKE ?", "%"+user.ID+"%")
 	if err != nil {
 		return nil, err
 	}

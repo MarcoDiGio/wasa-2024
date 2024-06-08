@@ -11,6 +11,7 @@ func (rt *_router) Handler() http.Handler {
 	rt.router.GET("/context", rt.wrap(rt.getContextReply))
 	rt.router.POST("/session", rt.wrap(rt.postSession))
 	rt.router.GET("/users", rt.wrap(rt.getAllUsers))
+	rt.router.GET("/users/:userName/search", rt.wrap(rt.getSearchUsers))
 	rt.router.GET("/users/:userName", rt.wrap(rt.getUserProfile))
 	rt.router.PUT("/users/:userName", rt.wrap(rt.changeUsername))
 	rt.router.GET("/users/:userName/stream", rt.wrap(rt.getStream))
