@@ -3,58 +3,47 @@ export default {
 	data: function () {
 		return {
 			errormsg: "",
-			loading: false,
-			some_data: null,
 			posts: [],
 			users: [],
 			activeUser: "",
 			searchResults: [],
 			userToSearch: "",
+			commentText: "",
 		}
 	},
 	methods: {
-		async refresh() {
-			this.loading = true;
-			this.errormsg = null;
-			try {
-				let response = await this.$axios.get("/");
-				this.some_data = response.data;
-			} catch (e) {
-				this.errormsg = e.toString();
-			}
-			this.loading = false;
-		},
-		async newItem() {
-			try {
-				let response = await this.$axios.get("/users");
-				this.users = response.data;
-			} catch (e) {
-				this.errormsg = e.toString();
-			}
-		},
 		getActiveUser() {
 			this.activeUser = localStorage.getItem("token") || "";
 		},
 		async searchUser() {
-			this.loading = true;
 			this.errormsg = null;
 			try {
 				let response = await this.$axios.get(`/users/${this.userToSearch}/search`, {
 					headers: { "Authorization": `Bearer ${this.activeUser}` },
 				});
 				this.searchResults = response.data;
-				console.log(response.data)
 			} catch (e) {
 				this.errormsg = e.toString();
 			}
-			this.loading = false;
 		},
 		async getStream() {
 			try {
 				let response = await this.$axios.get(`/users/${this.activeUser}/stream`, {
 					headers: { "Authorization": `Bearer ${this.activeUser}` },
 				});
-				this.users = response.data;
+				this.posts = response.data;
+				console.log(this.posts)
+			} catch (e) {
+				this.errormsg = e.toString();
+			}
+		},
+		async postComment(authorId, photoId) {
+			try {
+				let response = await this.$axios.post(`/users/${authorId}/photos/${photoId}/comments`, {
+					"comment": this.commentText
+				}, {
+					headers: { "Authorization": `Bearer ${this.activeUser}` },
+				});
 			} catch (e) {
 				this.errormsg = e.toString();
 			}
@@ -115,6 +104,26 @@ export default {
 				<h5 class="card-title">{{ user.user_id }}</h5>
 			</div>
 		</div>
+		<!-- @TODO: CONVERT THIS DIV INTO PHOTO COMPONENT -->
+		<div v-for="post in posts" class="card">
+			<div class="card-body">
+				<img :src="'http://localhost:3000/users/' + post.author_id + '/photos/' + post.photo_ID" class="img" />
+				<h5 class="card-title">{{ post.author_id }}</h5>
+				<div>{{ post.likes.length }} Likes, {{ post.comments.length }} Comments</div>
+				<div>
+					<button type="button" class="button">Like</button>
+					<button type="button" class="button">Comment</button>
+				</div>
+				<div v-for="comment in post.comments">
+					<h5>{{ comment.user_id }} says:</h5>
+					<p>{{ comment.content }}</p>
+				</div>
+				<form @submit.prevent="postComment(post.author_id, post.photo_ID)">
+					<input type="text" name="commentText" v-model="commentText" placeholder="Write a comment..."/>
+					<button type="submit">Submit Comment</button>
+				</form>
+			</div>
+		</div>
 	</section>
 </template>
 
@@ -123,10 +132,21 @@ export default {
 	cursor: pointer;
 	transition: opacity 0.5s ease-out;
 }
-.card + .card {
+
+.card+.card {
 	margin-left: 2rem;
 }
+
 .card:hover {
 	opacity: 0.5;
+}
+
+.button+.button {
+	margin-left: .5rem;
+}
+
+.img {
+	max-width: 15rem;
+	object-fit: cover;
 }
 </style>

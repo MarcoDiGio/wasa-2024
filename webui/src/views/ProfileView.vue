@@ -16,6 +16,7 @@ export default {
             followingsCounter: 0,
             isFollower: false,
             isBanned: false,
+            uploadMessage: "",
         }
     },
     methods: {
@@ -68,7 +69,7 @@ export default {
                     }
                 });
                 this.isBanned = true;
-                if(this.isFollower) {
+                if (this.isFollower) {
                     this.followersCounter -= 1;
                     this.isFollower = false;
                 }
@@ -81,12 +82,33 @@ export default {
             try {
                 let response = await this.$axios.delete(`/users/${this.activeUser}/banned/${this.$route.params.userId}`, {
                     headers: {
-                        "Authorization": `Bearer ${localStorage.getItem("token")}`
+                        "Authorization": `Bearer ${localStorage.getItem("token")}`,
                     }
                 });
                 this.isBanned = false;
             } catch (e) {
                 this.errormsg = e.toString();
+            }
+        },
+        async uploadPhoto(event) {
+            this.uploadMessage = ""
+            const photo = event.target.files[0]
+            const reader = new FileReader();
+
+            reader.readAsArrayBuffer(photo)
+            reader.onload = async (data) => {
+                await this.$axios.post(`/users/${this.activeUser}/photos`, {
+                    file: data.target.result
+                }, {
+                    headers: {
+                        "Authorization": `Bearer ${localStorage.getItem("token")}`,
+                        "Content-Type": "multipart/form-data",
+                    }
+                })
+            }
+            reader.onloadend = () => {
+                this.uploadMessage = "File upload action succesful"
+                event.target.value = ""
             }
         },
         getActiveUser() {
@@ -117,8 +139,9 @@ export default {
         </div>
         <div v-else>
             <form enctype="multipart/form-data">
-                <input type="file" name="file" />
+                <input type="file" accept=".png, .jpg, .jpeg" @change="uploadPhoto" ref="fileInput"/>
             </form>
+            <div v-if="uploadMessage">{{ uploadMessage }}</div>
         </div>
     </div>
 </template>
