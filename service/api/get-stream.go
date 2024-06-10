@@ -15,7 +15,7 @@ func (rt *_router) getStream(w http.ResponseWriter, r *http.Request, ps httprout
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
-	var photos = make([]Photo, 0)
+	var photos = make([]FinalPhoto, 0)
 	followPhotos, err := rt.db.GetAllFollowingPhotos(User{ID: reqUserName}.toDatabase())
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -25,7 +25,7 @@ func (rt *_router) getStream(w http.ResponseWriter, r *http.Request, ps httprout
 		if j >= 5 {
 			break
 		}
-		photos = append(photos, fromDatabase(photo))
+		photos = append(photos, FinalPhoto(photo))
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
@@ -33,5 +33,6 @@ func (rt *_router) getStream(w http.ResponseWriter, r *http.Request, ps httprout
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		ctx.Logger.WithError(err).Error("couldn't convert go values to JSON")
+		return
 	}
 }

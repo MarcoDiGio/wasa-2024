@@ -37,7 +37,7 @@ func (rt *_router) changeUsername(w http.ResponseWriter, r *http.Request, ps htt
 		return
 	}
 	if exists {
-		w.WriteHeader(http.StatusConflict)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 	err = rt.db.ChangeUsername(newUser.ID, database.User{ID: pathUsername})

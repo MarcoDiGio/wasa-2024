@@ -55,14 +55,15 @@ type AppDatabase interface {
 
 	AddPhoto(photo Photo) (int64, error)
 	RemovePhoto(photoId string) error
-	GetAllUserPhotos(user User) ([]Photo, error)
-	GetAllFollowingPhotos(user User) ([]Photo, error)
+	GetAllUserPhotos(user User) ([]FinalPhoto, error)
+	GetAllFollowingPhotos(user User) ([]FinalPhoto, error)
 
 	AddComment(photoId string, user User, comment Comment) (int64, error)
 	RemoveComment(commentId string) error
 	GetCommentsByPhoto(photoId string) ([]Comment, error)
 
 	AddLike(user User, photoId string) error
+	GetLikesByPhoto(photoId string) ([]User, error)
 	RemoveLike(user User, photoId string) error
 
 	Ping() error

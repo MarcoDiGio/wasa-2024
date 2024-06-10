@@ -7,10 +7,10 @@ type User struct {
 }
 
 type UserProfile struct {
-	ID         string  `json:"user_id"`
-	Followings []User  `json:"followings"`
-	Followers  []User  `json:"followers"`
-	Photos     []Photo `json:"photos"`
+	ID         string       `json:"user_id"`
+	Followings []User       `json:"followings"`
+	Followers  []User       `json:"followers"`
+	Photos     []FinalPhoto `json:"photos"`
 }
 
 type Photo struct {
@@ -19,9 +19,22 @@ type Photo struct {
 	Date      time.Time `json:"date"`
 }
 
+type FinalPhoto struct {
+	Photo_ID  string    `json:"photo_ID"`
+	Author_ID string    `json:"author_id"`
+	Date      time.Time `json:"date"`
+	Comments  []Comment `json:"comments"`
+	Likes     []User    `json:"likes"`
+}
+
 type Comment struct {
 	Comment_ID string `json:"comment_id"`
 	Photo_ID   string `json:"photo_id"`
 	User_ID    string `json:"user_id"`
-	Comment    string `json:"content"`
+	Comment    string `json:"comment"`
+}
+
+type Like struct {
+	Liker_ID string `json:"liker_id"`
+	Photo_ID string `json:"photo_id"`
 }

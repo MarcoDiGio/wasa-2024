@@ -2,11 +2,11 @@
 # RUN IT USING docker run -it -p 8080:80 --rm wasaphoto-frontend:latest
 
 FROM node:lts as compiler
-WORKDIR /src/
+WORKDIR /app
 COPY webui webui
-WORKDIR /src/webui
+WORKDIR /app/webui
 RUN npm run build-prod
 
 FROM nginx:stable
-COPY --from=compiler /src/webui/dist /usr/share/nginx/html
+COPY --from=compiler /app/webui/dist /usr/share/nginx/html
 # CMD AND EXPOSE ARE ALREADY ON NGINX CONTAINER

@@ -9,14 +9,19 @@ import (
 )
 
 func (rt *_router) getPhotos(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
-	userName := ps.ByName("userName")
-	var user = User{ID: userName}
+	pathUsername := ps.ByName("userName")
+	var user = User{ID: pathUsername}
+	if !isAuthenticated(user.ID) {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
 	photos, err := rt.db.GetAllUserPhotos(user.toDatabase())
 	if err != nil {
 		ctx.Logger.WithError(err).Error("can't retrieve the photos")
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	err = json.NewEncoder(w).Encode(photos)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

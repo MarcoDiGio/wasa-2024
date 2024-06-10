@@ -58,7 +58,7 @@ func (rt *_router) addPhoto(w http.ResponseWriter, r *http.Request, ps httproute
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	err = json.NewEncoder(w).Encode(Photo.toDatabase(Photo{Photo_ID: strconv.FormatInt(photoId, 10), Author_ID: pathUsername, Date: timeNow}))
+	err = json.NewEncoder(w).Encode(FinalPhoto{Photo_ID: strconv.FormatInt(photoId, 10), Author_ID: pathUsername, Date: timeNow, Comments: nil, Likes: nil})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		ctx.Logger.WithError(err).Error("couldn't convert go values to JSON")

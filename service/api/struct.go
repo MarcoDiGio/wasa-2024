@@ -9,10 +9,25 @@ type User struct {
 	ID string `json:"user_id"`
 }
 
+type UserProfile struct {
+	ID         string                `json:"user_id"`
+	Followings []database.User       `json:"followings"`
+	Followers  []database.User       `json:"followers"`
+	Photos     []database.FinalPhoto `json:"photos"`
+}
+
 type Photo struct {
 	Photo_ID  string    `json:"photo_ID"`
 	Author_ID string    `json:"author_id"`
 	Date      time.Time `json:"date"`
+}
+
+type FinalPhoto struct {
+	Photo_ID  string             `json:"photo_ID"`
+	Author_ID string             `json:"author_id"`
+	Date      time.Time          `json:"date"`
+	Comments  []database.Comment `json:"comments"`
+	Likes     []database.User    `json:"likes"`
 }
 
 type Comment struct {
@@ -45,10 +60,11 @@ func (comment Comment) toDatabase() database.Comment {
 	}
 }
 
-func fromDatabase(photo database.Photo) Photo {
-	return Photo{
-		Photo_ID:  photo.Photo_ID,
-		Author_ID: photo.Author_ID,
-		Date:      photo.Date,
+func (profile UserProfile) toDatabase() database.UserProfile {
+	return database.UserProfile{
+		ID:         profile.ID,
+		Followings: profile.Followings,
+		Followers:  profile.Followers,
+		Photos:     profile.Photos,
 	}
 }

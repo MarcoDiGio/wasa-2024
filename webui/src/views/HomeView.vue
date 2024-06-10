@@ -98,37 +98,29 @@ export default {
 
 		<ErrorMsg v-if="errormsg" :msg="errormsg"></ErrorMsg>
 	</div>
-	<section class="d-flex flex-wrap flex-md-nowrap align-items-center mr-2">
-		<div v-for="user in searchResults" class="card" @click="this.$router.replace(`/users/${user.user_id}`)">
+	<section v-if="searchResults.length > 0" class="d-flex flex-wrap flex-md-nowrap align-items-center mt-4 mb-4">
+		<div v-for="user in searchResults" :key="user.user_id" class="card search-result" @click="this.$router.replace(`/users/${user.user_id}`)">
 			<div class="card-body">
 				<h5 class="card-title">{{ user.user_id }}</h5>
 			</div>
 		</div>
-		<!-- @TODO: CONVERT THIS DIV INTO PHOTO COMPONENT -->
-		<div v-for="post in posts" class="card">
-			<div class="card-body">
-				<img :src="'http://localhost:3000/users/' + post.author_id + '/photos/' + post.photo_ID" class="img" />
-				<h5 class="card-title">{{ post.author_id }}</h5>
-				<div>{{ post.likes.length }} Likes, {{ post.comments.length }} Comments</div>
-				<div>
-					<button type="button" class="button">Like</button>
-					<button type="button" class="button">Comment</button>
-				</div>
-				<div v-for="comment in post.comments">
-					<h5>{{ comment.user_id }} says:</h5>
-					<p>{{ comment.content }}</p>
-				</div>
-				<form @submit.prevent="postComment(post.author_id, post.photo_ID)">
-					<input type="text" name="commentText" v-model="commentText" placeholder="Write a comment..."/>
-					<button type="submit">Submit Comment</button>
-				</form>
-			</div>
-		</div>
+	</section>
+	<section>
+		<Photo 
+			v-for="(photo, index) in posts"
+			:key="index"
+			:photoId="photo.photo_ID"
+			:authorId="photo.author_id"
+			:date="photo.date"
+			:likes="photo.likes"
+			:comments="photo.comments"
+			:isAuthor="photo.author_id == activeUser"
+		/>
 	</section>
 </template>
 
 <style>
-.card {
+.search-result {
 	cursor: pointer;
 	transition: opacity 0.5s ease-out;
 }
@@ -137,7 +129,7 @@ export default {
 	margin-left: 2rem;
 }
 
-.card:hover {
+.search-result:hover {
 	opacity: 0.5;
 }
 
@@ -145,8 +137,4 @@ export default {
 	margin-left: .5rem;
 }
 
-.img {
-	max-width: 15rem;
-	object-fit: cover;
-}
 </style>

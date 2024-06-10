@@ -97,13 +97,20 @@ export default {
 
             reader.readAsArrayBuffer(photo)
             reader.onload = async (data) => {
-                await this.$axios.post(`/users/${this.activeUser}/photos`, {
+                let response = await this.$axios.post(`/users/${this.activeUser}/photos`, {
                     file: data.target.result
                 }, {
                     headers: {
                         "Authorization": `Bearer ${localStorage.getItem("token")}`,
                         "Content-Type": "multipart/form-data",
                     }
+                })
+                this.profile.photos.unshift({
+                    photo_ID: response.data.photo_ID,
+                    author_id: response.data.author_id,
+                    date: response.data.date,
+                    comments: [],
+                    likes: [],
                 })
             }
             reader.onloadend = () => {
@@ -114,6 +121,11 @@ export default {
         getActiveUser() {
             this.activeUser = localStorage.getItem("token")
         },
+        deletePhoto(photoId) {
+            console.log(photoId)
+            this.profile.photos = this.profile.photos.filter(photo => photo.photo_ID !== photoId)
+            console.log(this.profile.photos)
+        }
     },
     async mounted() {
         this.getActiveUser();
@@ -139,9 +151,20 @@ export default {
         </div>
         <div v-else>
             <form enctype="multipart/form-data">
-                <input type="file" accept=".png, .jpg, .jpeg" @change="uploadPhoto" ref="fileInput"/>
+                <input type="file" accept=".png, .jpg, .jpeg" @change="uploadPhoto" />
             </form>
             <div v-if="uploadMessage">{{ uploadMessage }}</div>
         </div>
+        <Photo 
+			v-for="photo in profile.photos"
+			:key="photo.photo_ID"
+			:photoId="photo.photo_ID"
+			:authorId="photo.author_id"
+			:date="photo.date"
+			:likes="photo.likes"
+			:comments="photo.comments"
+			:isAuthor="photo.author_id == activeUser"
+            @photoDeleted="deletePhoto"
+		/>
     </div>
 </template>

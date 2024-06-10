@@ -31,18 +31,28 @@ func (db *appdbimpl) CheckPhoto(photoId string) (bool, error) {
 	return exists, err
 }
 
-func (db *appdbimpl) GetAllUserPhotos(user User) ([]Photo, error) {
-	var photos = make([]Photo, 0)
+func (db *appdbimpl) GetAllUserPhotos(user User) ([]FinalPhoto, error) {
+	var photos = make([]FinalPhoto, 0)
 	rows, err := db.c.Query("SELECT * FROM photos WHERE author_id=? ORDER BY date DESC", user.ID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var photo Photo
+		var photo FinalPhoto
 		if err := rows.Scan(&photo.Photo_ID, &photo.Date, &photo.Author_ID); err != nil {
 			return nil, err
 		}
+		comments, err := db.GetCommentsByPhoto(photo.Photo_ID)
+		if err != nil {
+			return nil, err
+		}
+		likes, err := db.GetLikesByPhoto(photo.Photo_ID)
+		if err != nil {
+			return nil, err
+		}
+		photo.Comments = comments
+		photo.Likes = likes
 		photos = append(photos, photo)
 	}
 	if err = rows.Err(); err != nil {
@@ -51,18 +61,28 @@ func (db *appdbimpl) GetAllUserPhotos(user User) ([]Photo, error) {
 	return photos, nil
 }
 
-func (db *appdbimpl) GetAllFollowingPhotos(user User) ([]Photo, error) {
-	var photos = make([]Photo, 0)
+func (db *appdbimpl) GetAllFollowingPhotos(user User) ([]FinalPhoto, error) {
+	var photos = make([]FinalPhoto, 0)
 	rows, err := db.c.Query("SELECT * FROM photos WHERE author_id IN (SELECT followed FROM followers WHERE follower=?) ORDER BY date DESC", user.ID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var photo Photo
+		var photo FinalPhoto
 		if err := rows.Scan(&photo.Photo_ID, &photo.Date, &photo.Author_ID); err != nil {
 			return nil, err
 		}
+		comments, err := db.GetCommentsByPhoto(photo.Photo_ID)
+		if err != nil {
+			return nil, err
+		}
+		likes, err := db.GetLikesByPhoto(photo.Photo_ID)
+		if err != nil {
+			return nil, err
+		}
+		photo.Comments = comments
+		photo.Likes = likes
 		photos = append(photos, photo)
 	}
 	if err = rows.Err(); err != nil {

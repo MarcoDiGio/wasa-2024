@@ -16,7 +16,6 @@ func (rt *_router) deleteFollower(w http.ResponseWriter, r *http.Request, ps htt
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
-	// @TODO: CHECK IF BANNED
 	err := rt.db.RemoveFollower(database.User{ID: userFollower}, database.User{ID: pathUserToUnfollow})
 	if err != nil {
 		ctx.Logger.WithError(err).Error("can't remove the follow")
