@@ -23,7 +23,12 @@ func (rt *_router) changeUsername(w http.ResponseWriter, r *http.Request, ps htt
 	}
 	// if new username is equal to old username, skip db access
 	if newUser.ID == pathUsername {
-		json.NewEncoder(w).Encode(newUser)
+		err := json.NewEncoder(w).Encode(newUser)
+		if err != nil {
+			ctx.Logger.WithError(err).Error("bad body request")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
 		return
 	}
 	if pathUsername != reqToken {
