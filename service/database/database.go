@@ -109,37 +109,37 @@ func createDatabase(db *sql.DB) error {
 			photo_id INTEGER PRIMARY KEY AUTOINCREMENT,
 			date DATETIME NOT NULL,
 			author_id VARCHAR(16) NOT NULL,
-			FOREIGN KEY(author_id) REFERENCES users (id_user) ON DELETE CASCADE
+			FOREIGN KEY(author_id) REFERENCES users (user_id) ON DELETE CASCADE ON UPDATE CASCADE
 		);`,
 		`CREATE TABLE IF NOT EXISTS comments (
 			comment_id INTEGER PRIMARY KEY AUTOINCREMENT,
 			photo_id INTEGER NOT NULL,
 			user_id VARCHAR(16) NOT NULL,
 			comment VARCHAR(100) NOT NULL,
-			FOREIGN KEY(user_id) REFERENCES users (user_id) ON DELETE CASCADE,
+			FOREIGN KEY(user_id) REFERENCES users (user_id) ON DELETE CASCADE ON UPDATE CASCADE,
 			FOREIGN KEY(photo_id) REFERENCES photos (photo_id) ON DELETE CASCADE
 		);`,
 		`CREATE TABLE IF NOT EXISTS likes (
 			liker_id VARCHAR(16) NOT NULL,
 			photo_id INTEGER NOT NULL,
 			PRIMARY KEY(liker_id, photo_id),
-			FOREIGN KEY(liker_id) REFERENCES users (user_id) ON DELETE CASCADE,
+			FOREIGN KEY(liker_id) REFERENCES users (user_id) ON DELETE CASCADE ON UPDATE CASCADE,
 			FOREIGN KEY(photo_id) REFERENCES photos (photo_id) ON DELETE CASCADE
 		);`,
 		`CREATE TABLE IF NOT EXISTS banned_users (
 			banner VARCHAR(16) NOT NULL,
 			banned VARCHAR(16) NOT NULL,
 			PRIMARY KEY(banner, banned),
-			FOREIGN KEY(banner) REFERENCES users (id_user) ON DELETE CASCADE,
-			FOREIGN KEY(banned) REFERENCES users (id_user) ON DELETE CASCADE,
+			FOREIGN KEY(banner) REFERENCES users (user_id) ON DELETE CASCADE ON UPDATE CASCADE,
+			FOREIGN KEY(banned) REFERENCES users (user_id) ON DELETE CASCADE ON UPDATE CASCADE,
 			CONSTRAINT CHK_ForeignKeysDifferent CHECK (banner <> banned)
 		);`,
 		`CREATE TABLE IF NOT EXISTS followers (
 			follower VARCHAR(16) NOT NULL,
 			followed VARCHAR(16) NOT NULL,
 			PRIMARY KEY(follower, followed),
-			FOREIGN KEY(follower) REFERENCES users (id_user) ON DELETE CASCADE,
-			FOREIGN KEY(followed) REFERENCES users (id_user) ON DELETE CASCADE,
+			FOREIGN KEY(follower) REFERENCES users (user_id) ON DELETE CASCADE ON UPDATE CASCADE,
+			FOREIGN KEY(followed) REFERENCES users (user_id) ON DELETE CASCADE ON UPDATE CASCADE,
 			CONSTRAINT CHK_ForeignKeysDifferent CHECK (follower <> followed)
 		);`,
 	}

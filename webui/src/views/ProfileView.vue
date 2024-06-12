@@ -150,6 +150,7 @@ export default {
             <button v-if="isBanned" type="button" @click="unbanUser">UnBan</button>
         </div>
         <div v-else>
+            <button @click="() => this.$router.replace(`/users/${this.activeUser}/settings`)">Settings</button>
             <form enctype="multipart/form-data">
                 <input type="file" accept=".png, .jpg, .jpeg" @change="uploadPhoto" />
             </form>

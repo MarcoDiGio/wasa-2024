@@ -28,7 +28,7 @@ func (rt *_router) postSession(w http.ResponseWriter, r *http.Request, ps httpro
 	}
 	// using filepath for portability
 	path := filepath.Join("/tmp", "/users", user.ID, "/photos")
-	err = os.MkdirAll(path, os.ModeDir)
+	err = os.MkdirAll(path, os.ModePerm)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("can't create the user")
 		w.WriteHeader(http.StatusInternalServerError)

@@ -23,10 +23,11 @@ func (rt *_router) changeUsername(w http.ResponseWriter, r *http.Request, ps htt
 	}
 	// if new username is equal to old username, skip db access
 	if newUser.ID == pathUsername {
-		err := json.NewEncoder(w).Encode(newUser)
+		w.WriteHeader(http.StatusOK)
+		err = json.NewEncoder(w).Encode(newUser)
 		if err != nil {
-			ctx.Logger.WithError(err).Error("bad body request")
-			w.WriteHeader(http.StatusBadRequest)
+			w.WriteHeader(http.StatusInternalServerError)
+			ctx.Logger.WithError(err).Error("couldn't convert go values to JSON")
 			return
 		}
 		return
@@ -37,7 +38,7 @@ func (rt *_router) changeUsername(w http.ResponseWriter, r *http.Request, ps htt
 	}
 	exists, err := rt.db.CheckUser(newUser.toDatabase())
 	if err != nil {
-		ctx.Logger.WithError(err).Error("can't change the username")
+		ctx.Logger.WithError(err).Error("error checking user existence")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -45,17 +46,17 @@ func (rt *_router) changeUsername(w http.ResponseWriter, r *http.Request, ps htt
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	err = rt.db.ChangeUsername(newUser.ID, database.User{ID: pathUsername})
-	if err != nil {
-		ctx.Logger.WithError(err).Error("can't change the username")
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
 	oldPath := filepath.Join("/tmp", "/users", pathUsername)
 	newPath := filepath.Join("/tmp", "/users", newUser.ID)
 	err = os.Rename(oldPath, newPath)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("can't rename directory")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	err = rt.db.ChangeUsername(newUser.ID, database.User{ID: pathUsername})
+	if err != nil {
+		ctx.Logger.WithError(err).Error("can't change the username")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

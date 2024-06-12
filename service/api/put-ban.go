@@ -22,6 +22,12 @@ func (rt *_router) addBan(w http.ResponseWriter, r *http.Request, ps httprouter.
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	err = rt.db.RemoveFollower(User{ID: pathBannedId}.toDatabase(), User{ID: pathBannerId}.toDatabase())
+	if err != nil {
+		ctx.Logger.WithError(err).Error("can't remove the follow (in put-ban.go)")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 	err = rt.db.AddBan(User{ID: pathBannerId}.toDatabase(), User{ID: pathBannedId}.toDatabase())
 	if err != nil {
 		ctx.Logger.WithError(err).Error("can't add the ban")
