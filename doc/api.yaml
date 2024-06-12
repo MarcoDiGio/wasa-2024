@@ -311,7 +311,7 @@ paths:
         path.
       operationId: unlikePhoto
       responses:
-        '204': { description: Like deleted successfully }
+        '204': { $ref : "#/components/responses/NoContent" }
     put:
       tags: ["likes"]
       summary: Likes a photo
@@ -510,9 +510,3 @@ components:
       type: object
       properties:
         user_id: { $ref: "#/components/schemas/Username/properties/name" }
-    Users:
-      description: An array of users
-      type: array
-      minItems: 0
-      maxItems: 100
-      items: { $ref: "#/components/schemas/User" }
