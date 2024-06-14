@@ -122,9 +122,7 @@ export default {
             this.activeUser = localStorage.getItem("token")
         },
         deletePhoto(photoId) {
-            console.log(photoId)
             this.profile.photos = this.profile.photos.filter(photo => photo.photo_ID !== photoId)
-            console.log(this.profile.photos)
         }
     },
     async mounted() {

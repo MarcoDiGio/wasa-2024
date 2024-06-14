@@ -68,6 +68,9 @@ export default {
             } catch (e) {
                 this.errormsg = e.toString();
             }
+        },
+        deleteComment(commentId) {
+            this.reactiveComments = this.reactiveComments.filter(x => x.comment_id != commentId)
         }
     },
     mounted() {
@@ -82,7 +85,7 @@ export default {
         <div class="card-body">
             <img :src="photoURL" style="width: 32rem; height: 18rem; object-fit: contain;"/>
             <h5 class="card-title">{{ this.$props.authorId }}</h5>
-            <div>{{ this.reactiveLikes.length }} Likes, {{ this.comments.length }} Comments</div>
+            <div>{{ this.reactiveLikes.length }} Likes, {{ this.reactiveComments.length }} Comments</div>
             <div>
                 <button type="button" class="button" @click="addLike" v-if="!isLikedByBearer">Like</button>
                 <button type="button" class="button" @click="removeLike" v-else>Remove Like</button>
@@ -90,11 +93,17 @@ export default {
                 <button type="button" class="button" @click="() => showComments = !showComments">Comment</button>
             </div>
             <div v-if="showComments">
-                <!-- @TODO: CONVERT THIS INTO COMMENT COMPONENT -->
-                <div v-for="comment in reactiveComments">
-                    <h5>{{ comment.user_id }} says:</h5>
-                    <p>{{ comment.comment }}</p>
-                </div>
+                <PhotoComment
+                    v-for="comment in reactiveComments"
+                    :key="comment.comment_id"
+                    :commentId="comment.comment_id"
+                    :photoAuthorId="this.$props.authorId"
+                    :userId="this.activeUser"
+                    :photoId="this.$props.photoId"
+                    :comment="comment.comment"
+                    :isPhotoOwner="this.activeUser == this.$props.authorId"
+                    @commentDeleted="deleteComment"
+                />
                 <form @submit.prevent="postComment(this.$props.authorId, this.$props.photoId)">
                     <input type="text" name="commentText" v-model="commentText" placeholder="Write a comment..." />
                     <button type="submit">Submit Comment</button>
