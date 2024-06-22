@@ -106,6 +106,7 @@ paths:
               example: 
                 identifier: "abcdef012345"
         '400': { $ref : "#/components/responses/BadRequest" }
+        '409': { $ref : "#/components/responses/Conflict" }
         '500': { $ref : "#/components/responses/InternalServerError" }
   /users/{userName}/followers/{followId}:
     parameters: 
@@ -350,7 +351,7 @@ paths:
         path.
       operationId: commentPhoto
       responses:
-        '201': { $ref : "#/components/responses/NoContent" }
+        '201': { $ref : "#/components/responses/CommentAdded" }
         '404': { $ref : "#/components/responses/NotFound" }
         '500': { $ref : "#/components/responses/InternalServerError" }
   /users/{userName}/photos/{photoId}/comments/{commentId}:
@@ -419,8 +420,15 @@ components:
       description: Response with status code 403 (HTTP Forbidden)
     NotFound:
       description: Response with status code 404 (HTTP Not Found)
+    Conflict:
+      description: Response with status code 409 (HTTP Conflict)
     InternalServerError:
       description: Response with status code 500 (HTTP Internal Server Error)
+    CommentAdded:
+      description: Comment added succesfully
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Comment' }
 
   securitySchemes:
     BearerAuth:
@@ -510,3 +518,22 @@ components:
       type: object
       properties:
         user_id: { $ref: "#/components/schemas/Username/properties/name" }
+    Comment:
+      description: Full comment object that describes a comment
+      type: object
+      properties:
+        comment_id: { $ref: "#/components/schemas/Photo/properties/photo_id" }
+        photo_id: { $ref: "#/components/schemas/Photo/properties/photo_id" }
+        user_id: { $ref: "#/components/schemas/Username/properties/name" }
+        comment: 
+          type: string
+          minLength: 1
+          maxLength: 254
+          pattern: '^.*?$'
+          example: Here is a comment
+          description: The string comment of a photo
+      example: 
+        comment_id: 584
+        photo_id: 787
+        user_id: AcquaPanna
+        comment: "I love Tuscany"
