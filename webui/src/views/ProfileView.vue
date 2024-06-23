@@ -15,7 +15,10 @@ export default {
             followersCounter: 0,
             followingsCounter: 0,
             isFollower: false,
+            isFollowing: false,
             isBanned: false,
+            isBannedByFetcher: false,
+            userExists: false,
             uploadMessage: "",
         }
     },
@@ -26,11 +29,24 @@ export default {
                 let response = await this.$axios.get(`/users/${this.$route.params.userId}`, {
                     headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` }
                 });
+                this.userExists = true;
+                if (response.status == '206') {
+                    this.isBannedByFetcher = true;
+                    return
+                }
+                if (response.status == '204') {
+                    this.isBanned = true;
+                    return
+                }
                 this.profile = response.data;
                 this.isFollower = this.profile.followers.some((follow) => follow.user_id == this.activeUser)
-                this.followersCounter = response.data.followers.length;
-                this.followingsCounter = response.data.followings.length;
+                this.isFollowing = this.profile.followings.some((follow) => follow.user_id == this.activeUser)
+                this.followersCounter = this.profile.followers.length;
+                this.followingsCounter = this.profile.followings.length;
             } catch (e) {
+                if (e.response.status == 404) {
+                    this.userExists = false;
+                }
                 this.errormsg = e.toString();
             }
         },
@@ -73,6 +89,11 @@ export default {
                     this.followersCounter -= 1;
                     this.isFollower = false;
                 }
+                if (this.isFollowing) {
+                    this.followingsCounter -= 1;
+                    this.isFollowing = false;
+                }
+                window.location.reload();
             } catch (e) {
                 this.errormsg = e.toString();
             }
@@ -86,6 +107,7 @@ export default {
                     }
                 });
                 this.isBanned = false;
+                window.location.reload();
             } catch (e) {
                 this.errormsg = e.toString();
             }
@@ -133,7 +155,7 @@ export default {
 </script>
 
 <template>
-    <div>
+    <div v-if="userExists && !isBannedByFetcher">
         <ErrorMsg v-if="errormsg" :msg="errormsg"></ErrorMsg>
         <div>
             <h1>Profile View</h1>

@@ -15,7 +15,7 @@ func (rt *_router) getSearchUsers(w http.ResponseWriter, r *http.Request, ps htt
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
-	users, err := rt.db.SearchUser(User{ID: pathUsername}.toDatabase())
+	users, err := rt.db.SearchUser(User{ID: reqUser}.toDatabase(), User{ID: pathUsername}.toDatabase())
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		ctx.Logger.WithError(err).Error("can't retrieve the users")

@@ -41,8 +41,7 @@ type AppDatabase interface {
 	ChangeUsername(username string, user User) error
 	CheckUser(user User) (bool, error)
 	PostUser(user User) error
-	GetAllUsers() ([]User, error)
-	SearchUser(user User) ([]User, error)
+	SearchUser(user User, user2 User) ([]User, error)
 
 	AddFollower(follower User, followed User) error
 	GetFollower(user User) ([]User, error)

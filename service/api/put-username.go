@@ -43,7 +43,7 @@ func (rt *_router) changeUsername(w http.ResponseWriter, r *http.Request, ps htt
 		return
 	}
 	if exists {
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusConflict)
 		return
 	}
 	oldPath := filepath.Join("/tmp", "/users", pathUsername)

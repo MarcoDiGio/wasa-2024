@@ -28,10 +28,19 @@ func (rt *_router) getUserProfile(w http.ResponseWriter, r *http.Request, ps htt
 		return
 	}
 	if isBanned {
-		w.WriteHeader(http.StatusUnauthorized)
+		w.WriteHeader(http.StatusPartialContent)
 		return
 	}
-
+	hasBanned, err := rt.db.CheckBan(User{ID: reqUsername}.toDatabase(), User{ID: pathUsername}.toDatabase())
+	if err != nil {
+		ctx.Logger.WithError(err).Error("Error when checking ban")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	if hasBanned {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
 	followers, err := rt.db.GetFollower(User{ID: pathUsername}.toDatabase())
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

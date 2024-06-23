@@ -75,6 +75,7 @@ paths:
                   - photo_id: 2
                     author_id: "DavideFrattafalso"
                     date: 2023-09-24T17:33:34Z
+        '204': { $ref : "#/components/responses/NoContent" }
         '401': { $ref : "#/components/responses/Unauthorized" }
         '403': { $ref : "#/components/responses/Forbidden" }
         '404': { $ref : "#/components/responses/NotFound" }

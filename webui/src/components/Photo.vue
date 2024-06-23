@@ -98,7 +98,7 @@ export default {
                     :key="comment.comment_id"
                     :commentId="comment.comment_id"
                     :photoAuthorId="this.$props.authorId"
-                    :userId="this.activeUser"
+                    :userId="comment.user_id"
                     :photoId="this.$props.photoId"
                     :comment="comment.comment"
                     :isPhotoOwner="this.activeUser == this.$props.authorId"

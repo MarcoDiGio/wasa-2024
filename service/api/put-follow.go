@@ -3,7 +3,6 @@ package api
 import (
 	"net/http"
 	"wasa-2024-2024851/service/api/reqcontext"
-	"wasa-2024-2024851/service/database"
 
 	"github.com/julienschmidt/httprouter"
 )
@@ -16,8 +15,17 @@ func (rt *_router) addFollower(w http.ResponseWriter, r *http.Request, ps httpro
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
-	// @TODO: CHECK IF BANNED
-	err := rt.db.AddFollower(database.User{ID: userFollower}, database.User{ID: pathUserToFollow})
+	isBanned, err := rt.db.CheckBan(User{ID: pathUserToFollow}.toDatabase(), User{ID: userFollower}.toDatabase())
+	if err != nil {
+		ctx.Logger.WithError(err).Error("can't check the ban")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	if isBanned {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+	err = rt.db.AddFollower(User{ID: userFollower}.toDatabase(), User{ID: pathUserToFollow}.toDatabase())
 	if err != nil {
 		ctx.Logger.WithError(err).Error("can't add the follow")
 		w.WriteHeader(http.StatusInternalServerError)

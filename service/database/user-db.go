@@ -29,9 +29,17 @@ func (db *appdbimpl) CheckUser(u User) (bool, error) {
 	return exists, err
 }
 
-func (db *appdbimpl) GetAllUsers() ([]User, error) {
+func (db *appdbimpl) ChangeUsername(username string, user User) error {
+	_, err := db.c.Exec("UPDATE users SET user_id=? WHERE user_id=?", username, user.ID)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (db *appdbimpl) SearchUser(searcher User, userToSearch User) ([]User, error) {
 	var users = make([]User, 0)
-	rows, err := db.c.Query("SELECT * FROM users")
+	rows, err := db.c.Query("SELECT * FROM users WHERE user_id LIKE ?", "%"+userToSearch.ID+"%")
 	if err != nil {
 		return nil, err
 	}
@@ -41,33 +49,12 @@ func (db *appdbimpl) GetAllUsers() ([]User, error) {
 		if err := rows.Scan(&user.ID); err != nil {
 			return nil, err
 		}
-		users = append(users, user)
-	}
-	if err = rows.Err(); err != nil {
-		return nil, err
-	}
-	return users, nil
-}
-
-func (db *appdbimpl) ChangeUsername(username string, user User) error {
-	_, err := db.c.Exec("UPDATE users SET user_id=? WHERE user_id=?", username, user.ID)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (db *appdbimpl) SearchUser(user User) ([]User, error) {
-	var users = make([]User, 0)
-	rows, err := db.c.Query("SELECT * FROM users WHERE user_id LIKE ?", "%"+user.ID+"%")
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	for rows.Next() {
-		var user User
-		if err := rows.Scan(&user.ID); err != nil {
+		isBanned, err := db.CheckBan(user, searcher)
+		if err != nil {
 			return nil, err
+		}
+		if isBanned {
+			continue
 		}
 		users = append(users, user)
 	}

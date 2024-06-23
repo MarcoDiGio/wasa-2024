@@ -32,7 +32,6 @@ export default {
 					headers: { "Authorization": `Bearer ${this.activeUser}` },
 				});
 				this.posts = response.data;
-				console.log(this.posts)
 			} catch (e) {
 				this.errormsg = e.toString();
 			}

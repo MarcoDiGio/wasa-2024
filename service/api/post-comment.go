@@ -10,7 +10,7 @@ import (
 )
 
 func (rt *_router) addComment(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
-	// pathUsername := ps.ByName("userName")
+	pathUsername := ps.ByName("userName")
 	pathPhotoId := ps.ByName("photoId")
 	reqToken := getBearerToken(r.Header.Get("Authorization"))
 	var comment Comment
@@ -26,6 +26,16 @@ func (rt *_router) addComment(w http.ResponseWriter, r *http.Request, ps httprou
 		return
 	}
 	// @TODO: CHECK IF COMMENTER IS BANNED
+	isBanned, err := rt.db.CheckBan(User{ID: pathUsername}.toDatabase(), user.toDatabase())
+	if err != nil {
+		ctx.Logger.WithError(err).Error("could not check the ban in post comment")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	if isBanned {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
 	commentId, err := rt.db.AddComment(pathPhotoId, user.toDatabase(), comment.toDatabase())
 	if err != nil {
 		ctx.Logger.WithError(err).Error("could not add the comment")
