@@ -21,7 +21,10 @@ export default {
                 localStorage.setItem("token", response.data.user_id)
                 this.$router.replace("/")
             } catch (e) {
-                console.log(e)
+                if(e?.request?.status == 409) {
+                    this.errormsg = "User already exists"
+                    return
+                }
                 this.errormsg = e.toString();
             }
             this.username = "";

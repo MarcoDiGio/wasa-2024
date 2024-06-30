@@ -93,7 +93,6 @@ export default {
                     this.followingsCounter -= 1;
                     this.isFollowing = false;
                 }
-                window.location.reload();
             } catch (e) {
                 this.errormsg = e.toString();
             }
@@ -107,36 +106,40 @@ export default {
                     }
                 });
                 this.isBanned = false;
-                window.location.reload();
             } catch (e) {
                 this.errormsg = e.toString();
             }
         },
         async uploadPhoto(event) {
-            this.uploadMessage = ""
+            this.errormsg = null;
+            this.uploadMessage = "";
             const photo = event.target.files[0]
             const reader = new FileReader();
 
             reader.readAsArrayBuffer(photo)
             reader.onload = async (data) => {
-                let response = await this.$axios.post(`/users/${this.activeUser}/photos`, {
-                    file: data.target.result
-                }, {
-                    headers: {
-                        "Authorization": `Bearer ${localStorage.getItem("token")}`,
-                        "Content-Type": "multipart/form-data",
-                    }
-                })
-                this.profile.photos.unshift({
-                    photo_ID: response.data.photo_ID,
-                    author_id: response.data.author_id,
-                    date: response.data.date,
-                    comments: [],
-                    likes: [],
-                })
+                try {
+                    let response = await this.$axios.post(`/users/${this.activeUser}/photos`, {
+                        file: data.target.result
+                    }, {
+                        headers: {
+                            "Authorization": `Bearer ${localStorage.getItem("token")}`,
+                            "Content-Type": "multipart/form-data",
+                        }
+                    })
+                    this.profile.photos.unshift({
+                        photo_ID: response.data.photo_ID,
+                        author_id: response.data.author_id,
+                        date: response.data.date,
+                        comments: [],
+                        likes: [],
+                    })
+                    this.uploadMessage = "File upload action succesful"
+                } catch (e) {
+                    this.errormsg = e.toString();
+                }
             }
             reader.onloadend = () => {
-                this.uploadMessage = "File upload action succesful"
                 event.target.value = ""
             }
         },
@@ -176,16 +179,8 @@ export default {
             </form>
             <div v-if="uploadMessage">{{ uploadMessage }}</div>
         </div>
-        <Photo 
-			v-for="photo in profile.photos"
-			:key="photo.photo_ID"
-			:photoId="photo.photo_ID"
-			:authorId="photo.author_id"
-			:date="photo.date"
-			:likes="photo.likes"
-			:comments="photo.comments"
-			:isAuthor="photo.author_id == activeUser"
-            @photoDeleted="deletePhoto"
-		/>
+        <Photo v-for="photo in profile.photos" :key="photo.photo_ID" :photoId="photo.photo_ID"
+            :authorId="photo.author_id" :date="photo.date" :likes="photo.likes" :comments="photo.comments"
+            :isAuthor="photo.author_id == activeUser" @photoDeleted="deletePhoto" />
     </div>
 </template>

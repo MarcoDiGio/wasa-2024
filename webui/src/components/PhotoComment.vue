@@ -5,7 +5,7 @@ export default {
 
         }
     },
-    props: ["commentId", "photoAuthorId", "userId", "photoId", "comment", "isPhotoOwner"],
+    props: ["commentId", "photoAuthorId", "userId", "photoId", "comment", "isPhotoOwner", "isCommenter"],
     methods: {
         async deleteComment() {
             try {
@@ -25,6 +25,6 @@ export default {
     <div>
         <h5>{{ this.$props.userId }} says:</h5>
         <p>{{ this.$props.comment }}</p>
-        <button v-if="this.$props.isPhotoOwner" @click="deleteComment">Delete Comment</button>
+        <button v-if="this.$props.isPhotoOwner || this.$props.isCommenter" @click="deleteComment">Delete Comment</button>
     </div>
 </template>

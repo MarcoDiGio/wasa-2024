@@ -102,6 +102,7 @@ export default {
                     :photoId="this.$props.photoId"
                     :comment="comment.comment"
                     :isPhotoOwner="this.activeUser == this.$props.authorId"
+                    :isCommenter="this.activeUser == comment.user_id"
                     @commentDeleted="deleteComment"
                 />
                 <form @submit.prevent="postComment(this.$props.authorId, this.$props.photoId)">

@@ -12,6 +12,15 @@ func (db *appdbimpl) AddComment(photoId string, user User, comment Comment) (int
 	return id, nil
 }
 
+func (db *appdbimpl) CheckCommentAuthor(commentId string, photoId string, user User) (bool, error) {
+	var isCommenter bool
+	err := db.c.QueryRow("SELECT COUNT(*) FROM comments WHERE comment_id=? AND photo_id=? AND user_id=?", commentId, photoId, user.ID).Scan(&isCommenter)
+	if err != nil {
+		return false, err
+	}
+	return isCommenter, nil
+}
+
 func (db *appdbimpl) RemoveComment(commentId string) error {
 	_, err := db.c.Exec("DELETE FROM comments WHERE comment_id=?", commentId)
 	if err != nil {

@@ -28,6 +28,21 @@ func (rt *_router) addPhoto(w http.ResponseWriter, r *http.Request, ps httproute
 	}
 	defer file.Close()
 
+	// read all of the contents of our uploaded file into a
+	// byte array
+	fileBytes, err := io.ReadAll(file)
+	if err != nil {
+		ctx.Logger.WithError(err).Error("Could not read file")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	contentType := http.DetectContentType(fileBytes)
+	if contentType != "image/jpeg" && contentType != "image/png" {
+		w.WriteHeader(http.StatusBadRequest)
+		ctx.Logger.Error("Content type is invalid ", contentType)
+		return
+	}
 	timeNow := time.Now()
 	photoId, err := rt.db.AddPhoto(Photo.toDatabase(Photo{Author_ID: pathUsername, Date: timeNow}))
 	if err != nil {
@@ -42,14 +57,6 @@ func (rt *_router) addPhoto(w http.ResponseWriter, r *http.Request, ps httproute
 		return
 	}
 	defer tempFile.Close()
-
-	// read all of the contents of our uploaded file into a
-	// byte array
-	fileBytes, err := io.ReadAll(file)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
 	// write this byte array to our temporary file
 	_, err = tempFile.Write(fileBytes)
 	if err != nil {

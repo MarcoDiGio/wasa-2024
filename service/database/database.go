@@ -58,6 +58,7 @@ type AppDatabase interface {
 	GetAllFollowingPhotos(user User) ([]FinalPhoto, error)
 
 	AddComment(photoId string, user User, comment Comment) (int64, error)
+	CheckCommentAuthor(commentId string, photoId string, user User) (bool, error)
 	RemoveComment(commentId string) error
 	GetCommentsByPhoto(photoId string) ([]Comment, error)
 
